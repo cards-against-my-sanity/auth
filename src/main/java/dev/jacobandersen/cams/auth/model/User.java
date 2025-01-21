@@ -12,7 +12,6 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", columnDefinition = "char(36)")
-    @JsonIgnore
     private UUID id;
 
     @Column(name = "email", unique = true, nullable = false)
