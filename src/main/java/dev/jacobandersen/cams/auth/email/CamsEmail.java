@@ -1,4 +1,4 @@
-package dev.jacobandersen.cams.auth.api;
+package dev.jacobandersen.cams.auth.email;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;

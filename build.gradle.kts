@@ -3,7 +3,8 @@ plugins {
 	id("org.springframework.boot") version "3.4.0"
 	id("io.spring.dependency-management") version "1.1.6"
 	id("org.hibernate.orm") version "6.6.2.Final"
-	id("org.graalvm.buildtools.native") version "0.10.3"
+	id("org.sonarqube") version "6.1.0.5360"
+	jacoco
 }
 
 group = "dev.jacobandersen.cams"
@@ -45,6 +46,9 @@ dependencies {
 	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.springframework.security:spring-security-test")
+	testImplementation("org.testcontainers:junit-jupiter:1.21.0")
+	testImplementation("org.testcontainers:mariadb:1.21.0")
+	testImplementation("org.apache.commons:commons-lang3:3.17.0")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
@@ -54,6 +58,52 @@ hibernate {
 	}
 }
 
-tasks.withType<Test> {
+sonar {
+	properties {
+		property("sonar.projectKey", "cards-against-my-sanity_auth")
+		property("sonar.organization", "cards-against-my-sanity")
+		property("sonar.host.url", "https://sonarcloud.io")
+	}
+}
+
+tasks.test {
 	useJUnitPlatform()
+}
+
+tasks.jacocoTestReport {
+	dependsOn(tasks.test)
+
+	classDirectories.setFrom(
+		files(classDirectories.files.map {
+			fileTree(it) {
+				exclude(
+					"**/annotation/**",
+					"**/api/**",
+					"**/config/**",
+					"**/*Config.class",
+					"**/dto/**",
+					"**/*Dto.class",
+					"**/exception/**",
+					"**/*Exception.class",
+					"**/model/**",
+					"**/repo/**"
+				)
+			}
+		})
+	)
+}
+
+tasks.jacocoTestCoverageVerification {
+	dependsOn(tasks.jacocoTestReport)
+
+	violationRules {
+		rule {
+			element = "BUNDLE"
+			limit {
+				counter = "LINE"
+				value = "COVEREDRATIO"
+				minimum = "0.6".toBigDecimal()
+			}
+		}
+	}
 }

@@ -1,0 +1,13 @@
+name: "Compile and Test"
+
+on:
+  workflow_call:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ./.github/actions/common
+
+      - name: Build and run tests
+        run: ./gradlew build test

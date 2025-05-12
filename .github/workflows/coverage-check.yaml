@@ -1,0 +1,16 @@
+name: "Coverage Check"
+
+on:
+  workflow_call:
+
+jobs:
+  coverage-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ./.github/actions/common
+
+      - name: Generate Jacoco Report
+        run: ./gradlew jacocoTestReport
+
+      - name: Run Jacoco Coverage Verification
+        run: ./gradlew jacocoTestCoverageVerification

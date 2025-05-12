@@ -1,6 +1,6 @@
 package dev.jacobandersen.cams.auth.service;
 
-import dev.jacobandersen.cams.auth.api.CamsEmail;
+import dev.jacobandersen.cams.auth.email.CamsEmail;
 import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;

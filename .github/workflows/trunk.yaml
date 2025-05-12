@@ -1,0 +1,22 @@
+name: CI Pipeline [Trunk]
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  compile-and-test:
+    uses: ./.github/workflows/compile-and-test.yaml
+
+  coverage-check:
+    uses: ./.github/workflows/coverage-check.yaml
+    needs: compile-and-test
+
+  sonar:
+    uses: ./.github/workflows/sonar-scan.yaml
+    needs: coverage-check
+
+  build-and-publish-image:
+    uses: ./.github/workflows/build-and-publish-image.yaml
+    needs: sonar

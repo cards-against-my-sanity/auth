@@ -1,6 +1,5 @@
 package dev.jacobandersen.cams.auth.email;
 
-import dev.jacobandersen.cams.auth.api.CamsEmail;
 import dev.jacobandersen.cams.auth.model.User;
 import jakarta.mail.MessagingException;
 import org.springframework.mail.javamail.MimeMessageHelper;
