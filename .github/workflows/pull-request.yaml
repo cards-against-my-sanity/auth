@@ -1,9 +1,7 @@
 name: CI Pipeline [Pull-Request]
 
 on:
-  push:
-    branches-ignore:
-      - main
+  pull_request:
 
 jobs:
   compile-and-test:

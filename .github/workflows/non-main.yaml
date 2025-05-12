@@ -1,8 +1,9 @@
 name: CI Pipeline [Non-Main Branch]
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
+  push:
+    branches-ignore:
+      - main
 
 jobs:
   compile-and-test:
