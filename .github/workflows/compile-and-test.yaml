@@ -15,4 +15,4 @@ jobs:
       - uses: ./.github/actions/common
 
       - name: Build and run tests
-        run: ./gradlew build test
+        run: ./gradlew --no-daemon build test
