@@ -1,6 +1,5 @@
 package dev.jacobandersen.cams.auth.controller;
 
-import dev.jacobandersen.cams.auth.annotation.RFC5322Email;
 import dev.jacobandersen.cams.auth.annotation.WithRateLimit;
 import dev.jacobandersen.cams.auth.dto.in.ConfirmAccountRequestDto;
 import dev.jacobandersen.cams.auth.dto.in.EmailRequestBodyDto;
@@ -17,7 +16,9 @@ import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;

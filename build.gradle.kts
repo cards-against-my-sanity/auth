@@ -30,6 +30,7 @@ dependencies {
 	val jjwtVersion = "0.12.6"
 	val expiringMapVersion = "0.5.11"
 	val bucket4JVersion = "8.14.0"
+	val commonsValidatorVersion = "1.9.0"
 	val testContainersVersion = "1.21.0"
 	val apacheCommonsLangVersion = "3.17.0"
 
@@ -44,6 +45,7 @@ dependencies {
 	implementation("io.jsonwebtoken:jjwt-api:${jjwtVersion}")
 	implementation("net.jodah:expiringmap:${expiringMapVersion}")
 	implementation("com.bucket4j:bucket4j_jdk17-core:${bucket4JVersion}")
+	implementation("commons-validator:commons-validator:${commonsValidatorVersion}")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	runtimeOnly("io.jsonwebtoken:jjwt-impl:${jjwtVersion}")
 	runtimeOnly("io.jsonwebtoken:jjwt-jackson:${jjwtVersion}")

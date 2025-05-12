@@ -2,6 +2,7 @@ package dev.jacobandersen.cams.auth.service;
 
 import dev.jacobandersen.cams.auth.exception.InvalidJwtPurposeException;
 import dev.jacobandersen.cams.auth.exception.SessionMissingOrExpiredException;
+import dev.jacobandersen.cams.auth.exception.TokenExpiredException;
 import dev.jacobandersen.cams.auth.model.Session;
 import dev.jacobandersen.cams.auth.model.User;
 import dev.jacobandersen.cams.auth.repo.SessionRepository;
@@ -30,11 +31,11 @@ public class TokenService {
         this.userService = userService;
     }
 
-    public Claims validateToken(final String token, final String expectPurpose) throws JwtException, InvalidJwtPurposeException {
+    public Claims validateToken(final String token, final String expectPurpose) throws JwtException, InvalidJwtPurposeException, TokenExpiredException {
         return validateTokenWith(token, expectPurpose, null);
     }
 
-    public Claims validateTokenWith(final String token, final String expectPurpose, final String keySalt) throws JwtException, InvalidJwtPurposeException {
+    public Claims validateTokenWith(final String token, final String expectPurpose, final String keySalt) throws JwtException, InvalidJwtPurposeException, TokenExpiredException {
         final Claims claims = keySalt == null ? jwtUtil.extractClaims(token) : jwtUtil.extractClaims(token, keySalt);
 
         if (!claims.get("purpose", String.class).equals(expectPurpose)) {
@@ -42,11 +43,14 @@ public class TokenService {
         }
 
         final Date expiration = claims.getExpiration();
-        if (expiration == null || expiration.after(new Date(System.currentTimeMillis()))) {
+
+        if (expiration == null) {
             return claims;
+        } else if (expiration.before(new Date())) {
+            throw new TokenExpiredException("Provided token is expired");
         }
 
-        return null;
+        return claims;
     }
 
     public String extractTokenSubjectWithoutValidation(final String token) {

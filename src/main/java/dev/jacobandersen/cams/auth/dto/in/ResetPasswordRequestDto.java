@@ -1,7 +1,6 @@
 package dev.jacobandersen.cams.auth.dto.in;
 
 import dev.jacobandersen.cams.auth.annotation.PasswordMatches;
-import dev.jacobandersen.cams.auth.annotation.RFC5322Email;
 import dev.jacobandersen.cams.auth.api.HasConfirmablePassword;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

@@ -1,9 +1,9 @@
 package dev.jacobandersen.cams.auth.dto.in;
 
-import dev.jacobandersen.cams.auth.annotation.RFC5322Email;
+import dev.jacobandersen.cams.auth.annotation.Email;
 
 public class EmailRequestBodyDto {
-    @RFC5322Email(message = "Email must be valid")
+    @Email(message = "Email must be valid")
     private String email;
 
     public String getEmail() {

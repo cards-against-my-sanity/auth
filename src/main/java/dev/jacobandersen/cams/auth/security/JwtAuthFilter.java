@@ -1,6 +1,5 @@
 package dev.jacobandersen.cams.auth.security;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import dev.jacobandersen.cams.auth.exception.InvalidJwtPurposeException;
 import dev.jacobandersen.cams.auth.model.User;
 import dev.jacobandersen.cams.auth.service.TokenService;

@@ -3,7 +3,6 @@ package dev.jacobandersen.cams.auth.security;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.jacobandersen.cams.auth.model.User;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -78,7 +77,9 @@ public class JwtUtil {
     }
 
     public String extractSubjectWithoutValidation(String token) {
-        int headerEnd = token.indexOf("."), signatureStart = token.lastIndexOf(".");
+        int headerEnd = token.indexOf(".");
+        int signatureStart = token.lastIndexOf(".");
+
         String payload = token.substring(headerEnd + 1, signatureStart);
         try {
             return objectMapper.readTree(Base64.getDecoder().decode(payload.getBytes(StandardCharsets.UTF_8))).get("sub").textValue();

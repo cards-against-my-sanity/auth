@@ -16,7 +16,9 @@ create table roles
 );
 
 insert into roles (name)
-values ('admin'), ('moderator'), ('user');
+values ('admin'),
+       ('moderator'),
+       ('user');
 
 create table user_roles
 (

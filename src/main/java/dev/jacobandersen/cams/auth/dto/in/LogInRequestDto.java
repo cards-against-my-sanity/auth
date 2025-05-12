@@ -1,12 +1,12 @@
 package dev.jacobandersen.cams.auth.dto.in;
 
-import dev.jacobandersen.cams.auth.annotation.RFC5322Email;
+import dev.jacobandersen.cams.auth.annotation.Email;
 import dev.jacobandersen.cams.auth.api.HasPassword;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public class LogInRequestDto implements HasPassword {
-    @RFC5322Email(message = "Email must be valid")
+    @Email(message = "Email must be valid")
     private String email;
 
 
