@@ -1,0 +1,17 @@
+name: CI Pipeline [Non-Main Branch]
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  compile-and-test:
+    uses: ./.github/workflows/components/compile-and-test.yaml
+
+  coverage-check:
+    uses: ./.github/workflows/components/coverage-check.yaml
+    needs: compile-and-test
+
+  sonar:
+    uses: ./.github/workflows/components/sonar-scan.yaml
+    needs: coverage-check

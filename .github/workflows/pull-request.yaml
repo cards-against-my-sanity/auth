@@ -1,0 +1,18 @@
+name: CI Pipeline [Pull-Request]
+
+on:
+  push:
+    branches-ignore:
+      - main
+
+jobs:
+  compile-and-test:
+    uses: ./.github/workflows/components/compile-and-test.yaml
+
+  coverage-check:
+    uses: ./.github/workflows/components/coverage-check.yaml
+    needs: compile-and-test
+
+  sonar:
+    uses: ./.github/workflows/components/sonar-scan.yaml
+    needs: coverage-check
