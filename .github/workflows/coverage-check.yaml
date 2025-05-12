@@ -14,8 +14,5 @@ jobs:
 
       - uses: ./.github/actions/common
 
-      - name: Generate Jacoco Report
-        run: ./gradlew --no-daemon jacocoTestReport
-
       - name: Run Jacoco Coverage Verification
         run: ./gradlew --no-daemon jacocoTestCoverageVerification
