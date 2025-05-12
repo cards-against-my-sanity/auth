@@ -1,6 +1,7 @@
 package dev.jacobandersen.cams.auth.security;
 
 import dev.jacobandersen.cams.auth.exception.InvalidJwtPurposeException;
+import dev.jacobandersen.cams.auth.exception.TokenExpiredException;
 import dev.jacobandersen.cams.auth.model.User;
 import dev.jacobandersen.cams.auth.service.TokenService;
 import dev.jacobandersen.cams.auth.service.UserService;
@@ -46,7 +47,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         final Claims claims;
         try {
             claims = tokenService.validateToken(token, "access");
-        } catch (JwtException | InvalidJwtPurposeException ex) {
+        } catch (JwtException | InvalidJwtPurposeException | TokenExpiredException ex) {
             filterChain.doFilter(request, response);
             return;
         }

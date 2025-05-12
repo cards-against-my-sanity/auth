@@ -6,6 +6,7 @@ import dev.jacobandersen.cams.auth.dto.in.EmailRequestBodyDto;
 import dev.jacobandersen.cams.auth.dto.out.BasicMessageResponseDto;
 import dev.jacobandersen.cams.auth.email.ConfirmAccountEmail;
 import dev.jacobandersen.cams.auth.exception.InvalidJwtPurposeException;
+import dev.jacobandersen.cams.auth.exception.TokenExpiredException;
 import dev.jacobandersen.cams.auth.model.User;
 import dev.jacobandersen.cams.auth.service.EmailService;
 import dev.jacobandersen.cams.auth.service.TokenService;
@@ -69,7 +70,7 @@ public class ConfirmationController {
         final Claims claims;
         try {
             claims = tokenService.validateToken(decodedToken, "confirmation");
-        } catch (JwtException | InvalidJwtPurposeException ex) {
+        } catch (JwtException | InvalidJwtPurposeException | TokenExpiredException ex) {
             return ResponseEntity.badRequest().body(new BasicMessageResponseDto(ex.getMessage()));
         }
 

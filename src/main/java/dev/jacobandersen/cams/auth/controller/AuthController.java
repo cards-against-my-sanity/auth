@@ -8,6 +8,7 @@ import dev.jacobandersen.cams.auth.dto.out.BasicMessageResponseDto;
 import dev.jacobandersen.cams.auth.dto.out.BasicTokenResponseDto;
 import dev.jacobandersen.cams.auth.exception.InvalidJwtPurposeException;
 import dev.jacobandersen.cams.auth.exception.SessionMissingOrExpiredException;
+import dev.jacobandersen.cams.auth.exception.TokenExpiredException;
 import dev.jacobandersen.cams.auth.model.Session;
 import dev.jacobandersen.cams.auth.model.User;
 import dev.jacobandersen.cams.auth.service.AuthService;
@@ -100,7 +101,7 @@ public class AuthController {
         final Claims claims;
         try {
             claims = tokenService.validateToken(refreshToken, TokenPurpose.REFRESH);
-        } catch (JwtException | InvalidJwtPurposeException ex) {
+        } catch (JwtException | InvalidJwtPurposeException | TokenExpiredException ex) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 

@@ -6,11 +6,11 @@ import dev.jacobandersen.cams.auth.dto.in.ResetPasswordRequestDto;
 import dev.jacobandersen.cams.auth.dto.out.BasicMessageResponseDto;
 import dev.jacobandersen.cams.auth.email.ForgotPasswordEmail;
 import dev.jacobandersen.cams.auth.exception.InvalidJwtPurposeException;
+import dev.jacobandersen.cams.auth.exception.TokenExpiredException;
 import dev.jacobandersen.cams.auth.model.User;
 import dev.jacobandersen.cams.auth.service.EmailService;
 import dev.jacobandersen.cams.auth.service.TokenService;
 import dev.jacobandersen.cams.auth.service.UserService;
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
@@ -71,7 +71,7 @@ public class ForgotPasswordController {
 
         try {
             tokenService.validateTokenWith(decodedToken, "password-reset", user.getPassword());
-        } catch (ExpiredJwtException ex) {
+        } catch (TokenExpiredException ex) {
             return ResponseEntity.badRequest().body(new BasicMessageResponseDto("Password reset token expired. Please request a new one."));
         } catch (JwtException | InvalidJwtPurposeException ex) {
             return ResponseEntity.badRequest().body(new BasicMessageResponseDto("Password reset token failed validation. Please request a new one."));
