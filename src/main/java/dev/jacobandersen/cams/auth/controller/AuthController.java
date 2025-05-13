@@ -53,7 +53,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<Object> login(@Valid @RequestBody LogInRequestDto dto, @CookieValue(value = CamsAuthConstant.ACCESS_TOKEN_COOKIE_NAME, required = false) String maybeAccessToken, @CookieValue(value = CamsAuthConstant.REFRESH_TOKEN_COOKIE_NAME, required = false) String maybeRefreshToken) {
-        logger.info("login: invoke, process login for user {} and remember me = {}", dto.getEmail(), dto.isRememberMe());
+        logger.info("login: invoke");
 
         if (maybeAccessToken != null || maybeRefreshToken != null) {
             logger.info("login: fail, potentially already logged in (access token or refresh token already exists, clear cookies!)");
