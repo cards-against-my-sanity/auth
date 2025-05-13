@@ -31,6 +31,7 @@ dependencies {
 	val expiringMapVersion = "0.5.11"
 	val bucket4JVersion = "8.14.0"
 	val commonsValidatorVersion = "1.9.0"
+	val mockitoCoreVersion = "5.17.0"
 	val testContainersVersion = "1.21.0"
 	val apacheCommonsLangVersion = "3.17.0"
 
@@ -54,6 +55,7 @@ dependencies {
 	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.springframework.security:spring-security-test")
+	testImplementation("org.mockito:mockito-core:${mockitoCoreVersion}")
 	testImplementation("org.testcontainers:junit-jupiter:${testContainersVersion}")
 	testImplementation("org.testcontainers:mariadb:${testContainersVersion}")
 	testImplementation("org.apache.commons:commons-lang3:${apacheCommonsLangVersion}")
