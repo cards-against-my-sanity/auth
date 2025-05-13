@@ -17,6 +17,8 @@ import dev.jacobandersen.cams.auth.service.UserService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.server.Cookie;
 import org.springframework.http.HttpHeaders;
@@ -34,6 +36,8 @@ import java.util.UUID;
 
 @RestController
 public class AuthController {
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+
     private final AuthenticationManager authenticationManager;
     private final UserService userService;
     private final AuthService authService;
@@ -49,36 +53,45 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<Object> login(@Valid @RequestBody LogInRequestDto dto, @CookieValue(value = CamsAuthConstant.ACCESS_TOKEN_COOKIE_NAME, required = false) String maybeAccessToken, @CookieValue(value = CamsAuthConstant.REFRESH_TOKEN_COOKIE_NAME, required = false) String maybeRefreshToken) {
+        logger.info("login: invoke, process login for user {} and remember me = {}", dto.getEmail(), dto.isRememberMe());
+
         if (maybeAccessToken != null || maybeRefreshToken != null) {
+            logger.info("login: fail, potentially already logged in (access token or refresh token already exists, clear cookies!)");
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
 
         UsernamePasswordAuthenticationToken authToken = UsernamePasswordAuthenticationToken.unauthenticated(dto.getEmail(), dto.getPassword());
-
         final Authentication authentication;
         try {
+            logger.info("login: attempt authenticate user with username and password");
             authentication = authenticationManager.authenticate(authToken);
         } catch (BadCredentialsException ignored) {
+            logger.info("login: authentication fail, invalid username or password");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new BasicMessageResponseDto("Invalid username or password."));
         }
 
         final UserDetails details = (UserDetails) authentication.getPrincipal();
         final User user = userService.findUserByEmail(details.getUsername()).orElse(null);
         if (user == null) {
+            logger.info("login: fail, could not find user model for user email = {}", details.getUsername());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
 
         if (user.isBanned()) {
+            logger.info("login: fail, banned user");
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new BasicMessageResponseDto("You are banned."));
         } else if (!user.isConfirmed()) {
+            logger.info("login: fail, user is not confirmed");
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new BasicMessageResponseDto("Please confirm your account before logging in."));
         }
 
         final Session session = authService.createSession(user, dto.isRememberMe());
         if (session == null) {
+            logger.info("login: fail, failed to create session");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
 
+        logger.info("login: creating access and refresh cookies");
         ResponseCookie accessCookie = ResponseCookie.from(CamsAuthConstant.ACCESS_TOKEN_COOKIE_NAME)
                 .sameSite(Cookie.SameSite.LAX.attributeValue())
                 .value(tokenService.createAccessToken(user))
@@ -90,6 +103,7 @@ public class AuthController {
                 .value(tokenService.createRefreshToken(user, session))
                 .build();
 
+        logger.info("login: ok, sending response");
         return ResponseEntity.ok().headers(headers -> {
             headers.add(HttpHeaders.SET_COOKIE, accessCookie.toString());
             headers.add(HttpHeaders.SET_COOKIE, refreshCookie.toString());
