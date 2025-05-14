@@ -84,6 +84,10 @@ tasks.test {
 tasks.jacocoTestReport {
 	dependsOn(tasks.test)
 
+	reports {
+		xml.required = true
+	}
+
 	classDirectories.setFrom(
 		files(classDirectories.files.map {
 			fileTree(it) {
