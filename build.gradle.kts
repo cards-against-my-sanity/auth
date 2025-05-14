@@ -68,11 +68,25 @@ hibernate {
 	}
 }
 
+val coverageExclusions = arrayOf(
+	"**/annotation/**",
+	"**/api/**",
+	"**/config/**",
+	"**/*Config.class",
+	"**/dto/**",
+	"**/*Dto.class",
+	"**/exception/**",
+	"**/*Exception.class",
+	"**/model/**",
+	"**/repo/**"
+)
+
 sonar {
 	properties {
 		property("sonar.projectKey", "cards-against-my-sanity_auth")
 		property("sonar.organization", "cards-against-my-sanity")
 		property("sonar.host.url", "https://sonarcloud.io")
+		property("sonar.coverage.exclusions", coverageExclusions)
 	}
 }
 
@@ -91,18 +105,7 @@ tasks.jacocoTestReport {
 	classDirectories.setFrom(
 		files(classDirectories.files.map {
 			fileTree(it) {
-				exclude(
-					"**/annotation/**",
-					"**/api/**",
-					"**/config/**",
-					"**/*Config.class",
-					"**/dto/**",
-					"**/*Dto.class",
-					"**/exception/**",
-					"**/*Exception.class",
-					"**/model/**",
-					"**/repo/**"
-				)
+				exclude(coverageExclusions)
 			}
 		})
 	)
