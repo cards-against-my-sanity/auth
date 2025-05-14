@@ -8,6 +8,9 @@ import dev.jacobandersen.cams.auth.model.User;
 import dev.jacobandersen.cams.auth.service.AuthService;
 import dev.jacobandersen.cams.auth.service.TokenService;
 import dev.jacobandersen.cams.auth.service.UserService;
+import jakarta.servlet.http.Cookie;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,14 +18,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.testcontainers.shaded.org.apache.commons.lang3.RandomStringUtils;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.Collections;
-import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
@@ -32,9 +34,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(value = AuthController.class)
-@AutoConfigureMockMvc(addFilters = false
-)
+@AutoConfigureMockMvc(addFilters = false)
 class AuthControllerTest {
+    private static User fakeValidUser;
+    private static User fakeBannedUser;
+    private static User fakeUnconfirmedUser;
+    private static LogInRequestDto fakeLogInRequestDto;
+    private static Session fakeValidSession;
+    private static String generatedAccessToken;
+    private static String generatedRefreshToken;
+
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -45,55 +54,116 @@ class AuthControllerTest {
     private AuthenticationManager authenticationManager;
 
     @MockitoBean
-    private UserService userService;
-
-    @MockitoBean
     private AuthService authService;
 
     @MockitoBean
     private TokenService tokenService;
 
-    private static User fakeValidUser;
-    private static UserDetails fakeValidUserDetails;
-    private static Session fakeValidSession;
-    private static String generatedAccessToken;
-    private static String generatedRefreshToken;
+    @MockitoBean
+    private UserService userService;
 
     @BeforeAll
-    static void setup() {
+    static void prepareData() {
         fakeValidUser = new User();
-        fakeValidUser.setEmail("fake.valid.user@example.com");
         fakeValidUser.setConfirmed(true);
 
-        fakeValidUserDetails = org.springframework.security.core.userdetails.User
-                .withUsername(fakeValidUser.getEmail()).password("").build();
+        fakeBannedUser = new User();
+        fakeBannedUser.setBanned(true);
+
+        fakeUnconfirmedUser = new User();
+        fakeUnconfirmedUser.setConfirmed(false);
+
+        fakeLogInRequestDto = new LogInRequestDto();
+        fakeLogInRequestDto.setEmail("fake.valid.user@example.com");
+        fakeLogInRequestDto.setPassword("password");
 
         fakeValidSession = new Session(fakeValidUser);
 
-        generatedAccessToken = RandomStringUtils.randomAlphanumeric(64);
-        generatedRefreshToken = RandomStringUtils.randomAlphanumeric(64);
+        generatedAccessToken = RandomStringUtils.insecure().nextAlphabetic(64);
+        generatedRefreshToken = RandomStringUtils.insecure().nextAlphabetic(64);
     }
 
     @Test
-    void testSuccessfulLogin() throws Exception {
+    void testLogInSuccess() throws Exception {
         when(authenticationManager.authenticate(any())).thenReturn(UsernamePasswordAuthenticationToken.authenticated(
-                fakeValidUserDetails, null, Collections.emptyList()));
-        when(userService.findUserByEmail(anyString())).thenReturn(Optional.of(fakeValidUser));
+                fakeValidUser,
+                null,
+                Collections.emptyList()
+        ));
+
         when(authService.createSession(eq(fakeValidUser), anyBoolean())).thenReturn(fakeValidSession);
         when(tokenService.createAccessToken(fakeValidUser)).thenReturn(generatedAccessToken);
         when(tokenService.createRefreshToken(fakeValidUser, fakeValidSession)).thenReturn(generatedRefreshToken);
 
-        final LogInRequestDto dto = new LogInRequestDto();
-        dto.setEmail(fakeValidUser.getEmail());
-        dto.setPassword("password");
-        dto.setRememberMe(true);
-
-        mockMvc.perform(post("/login").content(objectMapper.writeValueAsString(dto)).contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(post("/login")
+                        .content(objectMapper.writeValueAsString(fakeLogInRequestDto))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(cookie().exists(CamsAuthConstant.ACCESS_TOKEN_COOKIE_NAME))
                 .andExpect(cookie().value(CamsAuthConstant.ACCESS_TOKEN_COOKIE_NAME, generatedAccessToken))
                 .andExpect(cookie().exists(CamsAuthConstant.REFRESH_TOKEN_COOKIE_NAME))
                 .andExpect(cookie().value(CamsAuthConstant.REFRESH_TOKEN_COOKIE_NAME, generatedRefreshToken));
+    }
+
+    @Test
+    void testLogInWhenAlreadyLoggedIn() throws Exception {
+        mockMvc.perform(post("/login")
+                        .content(objectMapper.writeValueAsString(fakeLogInRequestDto))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .cookie(new Cookie(CamsAuthConstant.ACCESS_TOKEN_COOKIE_NAME, generatedAccessToken)))
+                .andDo(print())
+                .andExpect(status().isConflict());
+
+        mockMvc.perform(post("/login")
+                        .content(objectMapper.writeValueAsString(fakeLogInRequestDto))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .cookie(new Cookie(CamsAuthConstant.REFRESH_TOKEN_COOKIE_NAME, generatedRefreshToken)))
+                .andDo(print())
+                .andExpect(status().isConflict());
+
+    }
+
+    @Test
+    void testLogInWhenInvalidCredentials() throws Exception {
+        when(authenticationManager.authenticate(any())).thenThrow(new BadCredentialsException("Bad credentials"));
+
+        mockMvc.perform(post("/login")
+                        .content(objectMapper.writeValueAsString(fakeLogInRequestDto))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void testLogInWhenBanned() throws Exception {
+        when(authenticationManager.authenticate(any())).thenReturn(UsernamePasswordAuthenticationToken.authenticated(
+                fakeBannedUser,
+                null,
+                Collections.emptyList()
+        ));
+
+        mockMvc.perform(post("/login")
+                        .content(objectMapper.writeValueAsString(fakeLogInRequestDto))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isForbidden())
+                .andExpect(MockMvcResultMatchers.content().string(Matchers.containsString("You are banned.")));
+    }
+
+    @Test
+    void testLogInWhenNotConfirmed() throws Exception {
+        when(authenticationManager.authenticate(any())).thenReturn(UsernamePasswordAuthenticationToken.authenticated(
+                fakeUnconfirmedUser,
+                null,
+                Collections.emptyList()
+        ));
+
+        mockMvc.perform(post("/login")
+                        .content(objectMapper.writeValueAsString(fakeLogInRequestDto))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isForbidden())
+                .andExpect(MockMvcResultMatchers.content().string(Matchers.containsString("Please confirm your account before logging in.")));
     }
 }

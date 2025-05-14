@@ -13,7 +13,6 @@ import dev.jacobandersen.cams.auth.model.Session;
 import dev.jacobandersen.cams.auth.model.User;
 import dev.jacobandersen.cams.auth.service.AuthService;
 import dev.jacobandersen.cams.auth.service.TokenService;
-import dev.jacobandersen.cams.auth.service.UserService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import jakarta.validation.Valid;
@@ -29,7 +28,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -39,14 +37,12 @@ public class AuthController {
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
     private final AuthenticationManager authenticationManager;
-    private final UserService userService;
     private final AuthService authService;
     private final TokenService tokenService;
 
     @Autowired
-    public AuthController(AuthenticationManager authenticationManager, UserService userService, AuthService authService, TokenService tokenService) {
+    public AuthController(AuthenticationManager authenticationManager, AuthService authService, TokenService tokenService) {
         this.authenticationManager = authenticationManager;
-        this.userService = userService;
         this.authService = authService;
         this.tokenService = tokenService;
     }
@@ -60,23 +56,19 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
 
-        UsernamePasswordAuthenticationToken authToken = UsernamePasswordAuthenticationToken.unauthenticated(dto.getEmail(), dto.getPassword());
         final Authentication authentication;
         try {
             logger.info("login: attempt authenticate user with username and password");
-            authentication = authenticationManager.authenticate(authToken);
+            authentication = authenticationManager.authenticate(UsernamePasswordAuthenticationToken.unauthenticated(
+                    dto.getEmail(),
+                    dto.getPassword()
+            ));
         } catch (BadCredentialsException ignored) {
             logger.info("login: authentication fail, invalid username or password");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new BasicMessageResponseDto("Invalid username or password."));
         }
 
-        final UserDetails details = (UserDetails) authentication.getPrincipal();
-        final User user = userService.findUserByEmail(details.getUsername()).orElse(null);
-        if (user == null) {
-            logger.info("login: fail, could not find user model for user email = {}", details.getUsername());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-
+        final User user = (User) authentication.getPrincipal();
         if (user.isBanned()) {
             logger.info("login: fail, banned user");
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new BasicMessageResponseDto("You are banned."));
@@ -85,11 +77,8 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new BasicMessageResponseDto("Please confirm your account before logging in."));
         }
 
+        logger.info("login: creating session");
         final Session session = authService.createSession(user, dto.isRememberMe());
-        if (session == null) {
-            logger.info("login: fail, failed to create session");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
 
         logger.info("login: creating access and refresh cookies");
         ResponseCookie accessCookie = ResponseCookie.from(CamsAuthConstant.ACCESS_TOKEN_COOKIE_NAME)

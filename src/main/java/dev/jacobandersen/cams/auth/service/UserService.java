@@ -6,6 +6,9 @@ import dev.jacobandersen.cams.auth.model.User;
 import dev.jacobandersen.cams.auth.repo.RoleRepository;
 import dev.jacobandersen.cams.auth.repo.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +17,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
-public class UserService {
+public class UserService implements UserDetailsService {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private final Role userRole;
@@ -68,5 +71,10 @@ public class UserService {
     public void updateUserPassword(User user, String password) {
         user.setPassword(passwordEncoder.encode(password));
         userRepository.save(user);
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return findUserByEmail(username).orElseThrow(() -> new UsernameNotFoundException(username));
     }
 }

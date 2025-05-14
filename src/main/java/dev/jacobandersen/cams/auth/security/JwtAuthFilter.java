@@ -15,7 +15,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -58,11 +57,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             return;
         }
 
-        final UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(user.getNickname(), user, user.getRoles().stream().map(role -> new SimpleGrantedAuthority(role.getName())).toList());
-        authToken.setDetails(user);
-
         final SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
-        securityContext.setAuthentication(authToken);
+        securityContext.setAuthentication(UsernamePasswordAuthenticationToken.authenticated(user, claims, user.getAuthorities()));
         SecurityContextHolder.setContext(securityContext);
 
         filterChain.doFilter(request, response);
