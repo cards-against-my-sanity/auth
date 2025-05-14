@@ -86,7 +86,7 @@ sonar {
 		property("sonar.projectKey", "cards-against-my-sanity_auth")
 		property("sonar.organization", "cards-against-my-sanity")
 		property("sonar.host.url", "https://sonarcloud.io")
-		property("sonar.coverage.exclusions", coverageExclusions)
+		property("sonar.coverage.exclusions", coverageExclusions.joinToString(","))
 	}
 }
 
