@@ -5,9 +5,9 @@ import dev.jacobandersen.cams.auth.constant.CamsAuthConstant;
 import dev.jacobandersen.cams.auth.dto.in.LogInRequestDto;
 import dev.jacobandersen.cams.auth.model.Session;
 import dev.jacobandersen.cams.auth.model.User;
+import dev.jacobandersen.cams.auth.security.JwtAuthenticator;
 import dev.jacobandersen.cams.auth.service.AuthService;
 import dev.jacobandersen.cams.auth.service.TokenService;
-import dev.jacobandersen.cams.auth.service.UserService;
 import jakarta.servlet.http.Cookie;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.hamcrest.Matchers;
@@ -60,7 +60,7 @@ class AuthControllerTest {
     private TokenService tokenService;
 
     @MockitoBean
-    private UserService userService;
+    private JwtAuthenticator jwtAuthenticator;
 
     @BeforeAll
     static void prepareData() {
