@@ -1,5 +1,7 @@
 package dev.jacobandersen.cams.auth.service;
 
+import dev.jacobandersen.cams.auth.constant.RefreshTokenTypeEnum;
+import dev.jacobandersen.cams.auth.constant.TokenPurpose;
 import dev.jacobandersen.cams.auth.exception.InvalidJwtPurposeException;
 import dev.jacobandersen.cams.auth.exception.SessionMissingOrExpiredException;
 import dev.jacobandersen.cams.auth.exception.TokenExpiredException;
@@ -61,10 +63,10 @@ public class TokenService {
         return jwtUtil.createRefreshToken(user.getId(), session.getId());
     }
 
-    public String refresh(final String refreshToken, final String type) throws JwtException, InvalidJwtPurposeException, SessionMissingOrExpiredException {
+    public String refresh(final String refreshToken, final RefreshTokenTypeEnum type) throws JwtException, InvalidJwtPurposeException, SessionMissingOrExpiredException {
         final Claims claims = jwtUtil.extractClaims(refreshToken);
 
-        if (!claims.get("purpose").equals("refresh")) {
+        if (!claims.get("purpose").equals(TokenPurpose.REFRESH)) {
             throw new InvalidJwtPurposeException("Specified token is not a refresh token.");
         }
 
@@ -77,13 +79,10 @@ public class TokenService {
             throw new SessionMissingOrExpiredException(String.format("Session %s is missing or expired.", sessionId));
         }
 
-        if (type.equals("access")) {
-            return createAccessToken(user);
-        } else if (type.equals("websocket")) {
-            return createWebsocketToken(user);
-        }
-
-        return null;
+        return switch (type) {
+            case ACCESS -> createAccessToken(user);
+            case WEBSOCKET -> createWebsocketToken(user);
+        };
     }
 
     public String createAccessToken(User user) {

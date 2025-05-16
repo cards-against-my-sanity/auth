@@ -2,12 +2,18 @@ package dev.jacobandersen.cams.auth.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.jacobandersen.cams.auth.constant.CamsAuthConstant;
+import dev.jacobandersen.cams.auth.constant.RefreshTokenTypeEnum;
 import dev.jacobandersen.cams.auth.dto.in.LogInRequestDto;
+import dev.jacobandersen.cams.auth.dto.in.RefreshTokenTypeRequestDto;
+import dev.jacobandersen.cams.auth.exception.InvalidJwtPurposeException;
+import dev.jacobandersen.cams.auth.exception.SessionMissingOrExpiredException;
 import dev.jacobandersen.cams.auth.model.Session;
 import dev.jacobandersen.cams.auth.model.User;
 import dev.jacobandersen.cams.auth.security.JwtAuthenticator;
 import dev.jacobandersen.cams.auth.service.AuthService;
 import dev.jacobandersen.cams.auth.service.TokenService;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
 import jakarta.servlet.http.Cookie;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.hamcrest.Matchers;
@@ -25,13 +31,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.Collections;
+import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(value = AuthController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -126,7 +133,7 @@ class AuthControllerTest {
 
     @Test
     void testLogInWhenInvalidCredentials() throws Exception {
-        when(authenticationManager.authenticate(any())).thenThrow(new BadCredentialsException("Bad credentials"));
+        when(authenticationManager.authenticate(any())).thenThrow(new BadCredentialsException("AuthControllerTest: Bad credentials"));
 
         mockMvc.perform(post("/login")
                         .content(objectMapper.writeValueAsString(fakeLogInRequestDto))
@@ -165,5 +172,97 @@ class AuthControllerTest {
                 .andDo(print())
                 .andExpect(status().isForbidden())
                 .andExpect(MockMvcResultMatchers.content().string(Matchers.containsString("Please confirm your account before logging in.")));
+    }
+
+    @Test
+    void testLogOutSuccess() throws Exception {
+        final UUID userId = UUID.randomUUID();
+        final UUID sessionId = UUID.randomUUID();
+        when(tokenService.validateToken(any(), any())).thenReturn(Jwts.claims().subject(userId.toString()).add("sid", sessionId.toString()).build());
+        when(authService.endSession(userId, sessionId)).thenReturn(true);
+
+        mockMvc.perform(delete("/logout")
+                        .cookie(new Cookie(CamsAuthConstant.REFRESH_TOKEN_COOKIE_NAME, generatedRefreshToken)))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(cookie().exists(CamsAuthConstant.REFRESH_TOKEN_COOKIE_NAME))
+                .andExpect(cookie().maxAge(CamsAuthConstant.REFRESH_TOKEN_COOKIE_NAME, 0))
+                .andExpect(cookie().exists(CamsAuthConstant.ACCESS_TOKEN_COOKIE_NAME))
+                .andExpect(cookie().maxAge(CamsAuthConstant.ACCESS_TOKEN_COOKIE_NAME, 0));
+    }
+
+    @Test
+    void testLogOutWhenInvalidToken() throws Exception {
+        when(tokenService.validateToken(any(), any())).thenThrow(new JwtException("AuthControllerTest: Invalid token"));
+
+        mockMvc.perform(delete("/logout")
+                        .cookie(new Cookie(CamsAuthConstant.REFRESH_TOKEN_COOKIE_NAME, generatedRefreshToken)))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void testRefreshSuccess() throws Exception {
+        final String newAccessToken = RandomStringUtils.insecure().nextAlphabetic(64);
+        when(tokenService.refresh(any(), eq(RefreshTokenTypeEnum.ACCESS))).thenReturn(newAccessToken);
+
+
+        mockMvc.perform(post("/refresh")
+                        .cookie(new Cookie(CamsAuthConstant.REFRESH_TOKEN_COOKIE_NAME, generatedRefreshToken))
+                        .content(objectMapper.writeValueAsString(new RefreshTokenTypeRequestDto().setType(RefreshTokenTypeEnum.ACCESS)))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(cookie().exists(CamsAuthConstant.ACCESS_TOKEN_COOKIE_NAME))
+                .andExpect(cookie().value(CamsAuthConstant.ACCESS_TOKEN_COOKIE_NAME, newAccessToken));
+
+        final String newWebsocketToken = RandomStringUtils.insecure().nextAlphabetic(64);
+        when(tokenService.refresh(any(), eq(RefreshTokenTypeEnum.WEBSOCKET))).thenReturn(newWebsocketToken);
+
+        mockMvc.perform(post("/refresh")
+                        .cookie(new Cookie(CamsAuthConstant.REFRESH_TOKEN_COOKIE_NAME, generatedRefreshToken))
+                        .content(objectMapper.writeValueAsString(new RefreshTokenTypeRequestDto().setType(RefreshTokenTypeEnum.WEBSOCKET)))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.token").value(newWebsocketToken));
+    }
+
+    @Test
+    void testRefreshInvalidTokenPurpose() throws Exception {
+        when(tokenService.refresh(any(), any())).thenThrow(new InvalidJwtPurposeException("AuthControllerTest: Invalid JWT purpose"));
+
+        mockMvc.perform(post("/refresh")
+                        .cookie(new Cookie(CamsAuthConstant.REFRESH_TOKEN_COOKIE_NAME, generatedRefreshToken))
+                        .content(objectMapper.writeValueAsString(new RefreshTokenTypeRequestDto().setType(RefreshTokenTypeEnum.ACCESS)))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+
+        mockMvc.perform(post("/refresh")
+                        .cookie(new Cookie(CamsAuthConstant.REFRESH_TOKEN_COOKIE_NAME, generatedRefreshToken))
+                        .content(objectMapper.writeValueAsString(new RefreshTokenTypeRequestDto().setType(RefreshTokenTypeEnum.WEBSOCKET)))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testRefreshExpiredSession() throws Exception {
+        when(tokenService.refresh(any(), any())).thenThrow(new SessionMissingOrExpiredException("AuthControllerTest: Session missing or expired"));
+
+        mockMvc.perform(post("/refresh")
+                        .cookie(new Cookie(CamsAuthConstant.REFRESH_TOKEN_COOKIE_NAME, generatedRefreshToken))
+                        .content(objectMapper.writeValueAsString(new RefreshTokenTypeRequestDto().setType(RefreshTokenTypeEnum.ACCESS)))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+
+        mockMvc.perform(post("/refresh")
+                        .cookie(new Cookie(CamsAuthConstant.REFRESH_TOKEN_COOKIE_NAME, generatedRefreshToken))
+                        .content(objectMapper.writeValueAsString(new RefreshTokenTypeRequestDto().setType(RefreshTokenTypeEnum.WEBSOCKET)))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
     }
 }

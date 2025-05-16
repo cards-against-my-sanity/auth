@@ -1,6 +1,7 @@
 package dev.jacobandersen.cams.auth.controller;
 
 import dev.jacobandersen.cams.auth.constant.CamsAuthConstant;
+import dev.jacobandersen.cams.auth.constant.RefreshTokenTypeEnum;
 import dev.jacobandersen.cams.auth.constant.TokenPurpose;
 import dev.jacobandersen.cams.auth.dto.in.LogInRequestDto;
 import dev.jacobandersen.cams.auth.dto.in.RefreshTokenTypeRequestDto;
@@ -30,6 +31,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @RestController
@@ -70,14 +72,14 @@ public class AuthController {
 
         final User user = (User) authentication.getPrincipal();
         if (user.isBanned()) {
-            logger.info("login: fail, banned user");
+            logger.info("login: fail, user {} ({}) is banned", user.getUsername(), user.getId());
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new BasicMessageResponseDto("You are banned."));
         } else if (!user.isConfirmed()) {
-            logger.info("login: fail, user is not confirmed");
+            logger.info("login: fail, user {} ({}) is not confirmed", user.getUsername(), user.getId());
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new BasicMessageResponseDto("Please confirm your account before logging in."));
         }
 
-        logger.info("login: creating session");
+        logger.info("login: creating session for user {} ({})", user.getUsername(), user.getId());
         final Session session = authService.createSession(user, dto.isRememberMe());
 
         logger.info("login: creating access and refresh cookies");
@@ -101,17 +103,23 @@ public class AuthController {
 
     @DeleteMapping("/logout")
     public ResponseEntity<Void> logout(@CookieValue(value = CamsAuthConstant.REFRESH_TOKEN_COOKIE_NAME) String refreshToken) {
+        logger.info("logout: invoke");
+
         final Claims claims;
         try {
+            logger.info("logout: attempt to validate refresh token");
             claims = tokenService.validateToken(refreshToken, TokenPurpose.REFRESH);
         } catch (JwtException | InvalidJwtPurposeException | TokenExpiredException ex) {
+            logger.info("logout: invalid refresh token", ex);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         UUID userId = UUID.fromString(claims.getSubject());
+        logger.info("logout: ending session for user {}", userId);
         UUID sessionId = UUID.fromString(claims.get("sid", String.class));
         authService.endSession(userId, sessionId);
 
+        logger.info("logout: ok, sending response");
         return ResponseEntity.ok().headers(headers -> {
             headers.add(HttpHeaders.SET_COOKIE, ResponseCookie.from(CamsAuthConstant.ACCESS_TOKEN_COOKIE_NAME).maxAge(0).build().toString());
             headers.add(HttpHeaders.SET_COOKIE, ResponseCookie.from(CamsAuthConstant.REFRESH_TOKEN_COOKIE_NAME).maxAge(0).build().toString());
@@ -120,25 +128,41 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public ResponseEntity<Object> refresh(@CookieValue(value = CamsAuthConstant.REFRESH_TOKEN_COOKIE_NAME) String refreshToken, @Valid @RequestBody RefreshTokenTypeRequestDto dto) {
+        logger.info("refresh: invoke, type = {}", dto.getType());
         try {
-            if (dto.getType().equals(TokenPurpose.ACCESS)) {
-                final ResponseCookie accessCookie = ResponseCookie.from(CamsAuthConstant.ACCESS_TOKEN_COOKIE_NAME)
-                        .httpOnly(true)
-                        .sameSite(Cookie.SameSite.LAX.attributeValue())
-                        .value(tokenService.refresh(refreshToken, TokenPurpose.ACCESS))
-                        .build();
-
-                return ResponseEntity.ok().headers(headers -> headers.set(HttpHeaders.SET_COOKIE, accessCookie.toString())).build();
-            } else if (dto.getType().equals(TokenPurpose.WEBSOCKET)) {
-                return ResponseEntity.ok().body(new BasicTokenResponseDto(tokenService.refresh(refreshToken, TokenPurpose.WEBSOCKET)));
-            } else {
-                return ResponseEntity.badRequest().build();
-            }
+            return switch (dto.getType()) {
+                case ACCESS -> handleAccessTokenRefresh(refreshToken);
+                case WEBSOCKET -> handleWebsocketTokenRefresh(refreshToken);
+            };
         } catch (InvalidJwtPurposeException ex) {
+            logger.warn("refresh: fail, tried to refresh using token other than refresh token", ex);
             return ResponseEntity.badRequest().build();
         } catch (JwtException | SessionMissingOrExpiredException ex) {
-            ex.printStackTrace();
+            logger.info("refresh: fail, invalid refresh token", ex);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+    }
+
+    private ResponseEntity<Object> handleAccessTokenRefresh(final String refreshToken) throws InvalidJwtPurposeException, SessionMissingOrExpiredException {
+        logger.info("handleAccessTokenRefresh: invoke, generate new access token");
+        final String accessToken = tokenService.refresh(refreshToken, RefreshTokenTypeEnum.ACCESS);
+
+        logger.info("handleAccessTokenRefresh: create new access token cookie");
+        final ResponseCookie accessCookie = ResponseCookie.from(CamsAuthConstant.ACCESS_TOKEN_COOKIE_NAME)
+                .httpOnly(true)
+                .sameSite(Cookie.SameSite.LAX.attributeValue())
+                .value(accessToken)
+                .build();
+
+        logger.info("handleAccessTokenRefresh: ok, sending response");
+        return ResponseEntity.ok().headers(headers -> headers.set(HttpHeaders.SET_COOKIE, accessCookie.toString())).build();
+    }
+
+    private ResponseEntity<Object> handleWebsocketTokenRefresh(final String refreshToken) throws InvalidJwtPurposeException, SessionMissingOrExpiredException {
+        logger.info("handleWebsocketTokenRefresh: invoke, generate new websocket token");
+        final String websocketToken = tokenService.refresh(refreshToken, RefreshTokenTypeEnum.WEBSOCKET);
+
+        logger.info("handleWebsocketTokenRefresh: ok, sending response");
+        return ResponseEntity.ok().body(new BasicTokenResponseDto(websocketToken));
     }
 }

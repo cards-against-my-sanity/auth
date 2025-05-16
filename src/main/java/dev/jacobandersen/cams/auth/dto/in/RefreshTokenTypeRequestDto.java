@@ -1,16 +1,19 @@
 package dev.jacobandersen.cams.auth.dto.in;
 
-import jakarta.validation.constraints.NotBlank;
+import dev.jacobandersen.cams.auth.constant.RefreshTokenTypeEnum;
+import jakarta.validation.constraints.NotNull;
 
 public class RefreshTokenTypeRequestDto {
-    @NotBlank(message = "Refresh token type must be specified")
-    private String type;
+    @NotNull(message = "Refresh token type must be valid")
+    private RefreshTokenTypeEnum type;
 
-    public String getType() {
+    public RefreshTokenTypeEnum getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public RefreshTokenTypeRequestDto setType(RefreshTokenTypeEnum type) {
         this.type = type;
+        return this;
     }
+
 }
