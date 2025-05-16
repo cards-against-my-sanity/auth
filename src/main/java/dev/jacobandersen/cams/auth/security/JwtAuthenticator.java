@@ -1,5 +1,6 @@
 package dev.jacobandersen.cams.auth.security;
 
+import dev.jacobandersen.cams.auth.constant.TokenPurpose;
 import dev.jacobandersen.cams.auth.exception.InvalidJwtPurposeException;
 import dev.jacobandersen.cams.auth.exception.TokenExpiredException;
 import dev.jacobandersen.cams.auth.model.User;
@@ -33,7 +34,7 @@ public final class JwtAuthenticator {
     public Optional<Authentication> authenticate(String token) {
         final Claims claims;
         try {
-            claims = tokenService.validateToken(token, "access");
+            claims = tokenService.validateToken(token, TokenPurpose.ACCESS);
         } catch (JwtException | InvalidJwtPurposeException | TokenExpiredException ex) {
             logger.info("Failed to validate token", ex);
             return Optional.empty();
