@@ -27,10 +27,10 @@ repositories {
 }
 
 dependencies {
-	val jjwtVersion = "0.12.6"
 	val expiringMapVersion = "0.5.11"
 	val bucket4JVersion = "8.14.0"
 	val commonsValidatorVersion = "1.9.0"
+	val bouncycastleVersion = "1.80"
 	val mockitoCoreVersion = "5.17.0"
 	val testContainersVersion = "1.21.0"
 	val apacheCommonsLangVersion = "3.17.0"
@@ -41,15 +41,17 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-security")
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.boot:spring-boot-starter-validation")
+	implementation("org.springframework.boot:spring-boot-starter-oauth2-authorization-server")
+	implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
+	implementation("org.thymeleaf.extras:thymeleaf-extras-springsecurity6")
 	implementation("org.flywaydb:flyway-core")
 	implementation("org.flywaydb:flyway-mysql")
-	implementation("io.jsonwebtoken:jjwt-api:${jjwtVersion}")
 	implementation("net.jodah:expiringmap:${expiringMapVersion}")
 	implementation("com.bucket4j:bucket4j_jdk17-core:${bucket4JVersion}")
 	implementation("commons-validator:commons-validator:${commonsValidatorVersion}")
+	implementation("org.bouncycastle:bcprov-jdk18on:${bouncycastleVersion}")
+	implementation("org.bouncycastle:bcpkix-jdk18on:${bouncycastleVersion}")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
-	runtimeOnly("io.jsonwebtoken:jjwt-impl:${jjwtVersion}")
-	runtimeOnly("io.jsonwebtoken:jjwt-jackson:${jjwtVersion}")
 	runtimeOnly("io.micrometer:micrometer-registry-prometheus")
 	runtimeOnly("org.mariadb.jdbc:mariadb-java-client")
 	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Log in</title>
+</head>
+<body>
+<form method="post" th:action="@{/login}">
+    <div th:if="${message}" th:text="${message}"></div>
+    <div th:if="${error}" th:text="${error}"></div>
+    <div th:if="${param.logout}">You have been logged out.</div>
+    <div>
+        <label for="email">Email:</label>
+        <input id="email" name="username" required type="email"/>
+    </div>
+    <div>
+        <label for="password">Password:</label>
+        <input id="password" name="password" required type="password"/>
+    </div>
+    <div>
+        <button type="submit">Log in</button>
+    </div>
+</form>
+</body>
+</html>

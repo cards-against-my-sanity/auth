@@ -1,6 +1,6 @@
 package dev.jacobandersen.cams.auth.service;
 
-import dev.jacobandersen.cams.auth.dto.in.SignUpRequestDto;
+import dev.jacobandersen.cams.auth.dto.SignUpRequestDto;
 import dev.jacobandersen.cams.auth.model.Role;
 import dev.jacobandersen.cams.auth.model.User;
 import dev.jacobandersen.cams.auth.repo.RoleRepository;

@@ -49,9 +49,6 @@ public class User implements UserDetails {
     )
     private List<Role> roles;
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "user")
-    private List<Session> sessions;
-
     public UUID getId() {
         return id;
     }
@@ -116,15 +113,6 @@ public class User implements UserDetails {
         this.roles = roles;
     }
 
-    public List<Session> getSessions() {
-        return sessions;
-    }
-
-    public User setSessions(List<Session> sessions) {
-        this.sessions = sessions;
-        return this;
-    }
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return getRoles().stream().map(role -> new SimpleGrantedAuthority(role.getName())).toList();
@@ -138,5 +126,10 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return !isBanned();
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return isConfirmed();
     }
 }

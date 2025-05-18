@@ -1,6 +1,6 @@
 package dev.jacobandersen.cams.auth.validator;
 
-import dev.jacobandersen.cams.auth.annotation.Email;
+import dev.jacobandersen.cams.auth.api.annotation.Email;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 

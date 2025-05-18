@@ -1,0 +1,61 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  application:
+    name: cams-auth
+  jpa:
+    hibernate:
+      ddl-auto: ${DDL_AUTO:validate}
+  datasource:
+    url: jdbc:mariadb://${DB_HOST}:${DB_PORT}/${DB_SCHEMA_NAME}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  mail:
+    host: ${SMTP_HOST}
+    username: ${SMTP_USERNAME}
+    password: ${SMTP_PASSWORD}
+    properties:
+      mail:
+        transport:
+          protocol: smtp
+        smtp:
+          port: ${SMTP_PORT:587}
+          auth: ${SMTP_USE_AUTH:true}
+          starttls:
+            enable: ${SMTP_STARTTLS_ENABLE:true}
+            required: ${SMTP_STARTTLS_REQUIRED:true}
+  security:
+    oauth2:
+      authorizationserver:
+        client:
+          web:
+            registration:
+              client-id: ${WEB_CLIENT_ID}
+              client-authentication-methods:
+                - "none"
+              authorization-grant-types:
+                - "authorization_code"
+                - "refresh_token"
+              redirect-uris:
+                - ${WEB_CLIENT_REDIRECT_URI}
+              post-logout-redirect-uris:
+                - ${WEB_CLIENT_POST_LOGOUT_REDIRECT_URI}
+              scopes:
+                - "openid"
+                - "profile"
+            require-authorization-consent: false
+            require-proof-key: true
+  mvc:
+    log-request-details: ${LOG_REQUEST_DETAILS:false}
+
+auth:
+  key:
+    id: ${AUTH_KEY_ID:}
+    path:
+      public: ${AUTH_KEY_PUBLIC_PATH:}
+      private: ${AUTH_KEY_PRIVATE_PATH:}
+
+logging:
+  level:
+    root: ${LOG_LEVEL:INFO}

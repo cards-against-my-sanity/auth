@@ -32,13 +32,3 @@ create table user_roles
         on delete cascade
         on update cascade
 );
-
-create table sessions
-(
-    id         char(36) primary key,
-    user_id    char(36)  not null,
-    expiration timestamp not null,
-    foreign key (user_id) references users (id)
-        on delete cascade
-        on update cascade
-);

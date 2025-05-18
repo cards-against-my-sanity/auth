@@ -1,109 +1,92 @@
 package dev.jacobandersen.cams.auth.service;
 
-import dev.jacobandersen.cams.auth.constant.RefreshTokenTypeEnum;
-import dev.jacobandersen.cams.auth.constant.TokenPurpose;
-import dev.jacobandersen.cams.auth.exception.InvalidJwtPurposeException;
-import dev.jacobandersen.cams.auth.exception.SessionMissingOrExpiredException;
-import dev.jacobandersen.cams.auth.exception.TokenExpiredException;
-import dev.jacobandersen.cams.auth.model.Session;
+import com.nimbusds.jose.JOSEException;
 import dev.jacobandersen.cams.auth.model.User;
-import dev.jacobandersen.cams.auth.repo.SessionRepository;
-import dev.jacobandersen.cams.auth.security.JwtUtil;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
+import dev.jacobandersen.cams.auth.security.token.ConfirmationTokenValidationContext;
+import dev.jacobandersen.cams.auth.security.token.JwtUtil;
+import dev.jacobandersen.cams.auth.security.token.PasswordResetTokenValidationContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
 import java.time.Duration;
 import java.util.Base64;
-import java.util.Date;
-import java.util.UUID;
 
 @Service
 public class TokenService {
+    private static final Logger logger = LoggerFactory.getLogger(TokenService.class);
+
     private final JwtUtil jwtUtil;
-    private final SessionRepository sessionRepository;
-    private final UserService userService;
 
     @Autowired
-    public TokenService(JwtUtil jwtUtil, SessionRepository sessionRepository, UserService userService) {
+    public TokenService(JwtUtil jwtUtil) {
         this.jwtUtil = jwtUtil;
-        this.sessionRepository = sessionRepository;
-        this.userService = userService;
     }
 
-    public Claims validateToken(final String token, final String expectPurpose) throws JwtException, InvalidJwtPurposeException, TokenExpiredException {
-        return validateTokenWith(token, expectPurpose, null);
-    }
-
-    public Claims validateTokenWith(final String token, final String expectPurpose, final String keySalt) throws JwtException, InvalidJwtPurposeException, TokenExpiredException {
-        final Claims claims = keySalt == null ? jwtUtil.extractClaims(token) : jwtUtil.extractClaims(token, keySalt);
-
-        if (!claims.get("purpose", String.class).equals(expectPurpose)) {
-            throw new InvalidJwtPurposeException(String.format("Provided token does not match expected purpose: %s", expectPurpose));
+    public String createConfirmationToken(final User user) {
+        final byte[] token;
+        try {
+            token = jwtUtil.createConfirmationToken(user, Duration.ofMinutes(10)).getBytes(StandardCharsets.UTF_8);
+        } catch (JOSEException ex) {
+            logger.error("Failed to create account confirmation token", ex);
+            return null;
         }
 
-        final Date expiration = claims.getExpiration();
+        return Base64.getEncoder().encodeToString(token);
+    }
 
-        if (expiration == null) {
-            return claims;
-        } else if (expiration.before(new Date())) {
-            throw new TokenExpiredException("Provided token is expired");
+    public ConfirmationTokenValidationContext validateConfirmationToken(final String encodedToken) {
+        final String token = decodeBase64(encodedToken);
+        if (null == token) {
+            return ConfirmationTokenValidationContext.NULL;
         }
 
-        return claims;
+        try {
+            return jwtUtil.validateConfirmationToken(token);
+        } catch (ParseException | JOSEException ex) {
+            logger.error("Failed to validate account confirmation token", ex);
+            return ConfirmationTokenValidationContext.NULL;
+        }
     }
 
-    public String extractTokenSubjectWithoutValidation(final String token) {
-        return jwtUtil.extractSubjectWithoutValidation(token);
-    }
-
-    public String createRefreshToken(User user, Session session) {
-        return jwtUtil.createRefreshToken(user.getId(), session.getId());
-    }
-
-    public String refresh(final String refreshToken, final RefreshTokenTypeEnum type) throws JwtException, InvalidJwtPurposeException, SessionMissingOrExpiredException {
-        final Claims claims = jwtUtil.extractClaims(refreshToken);
-
-        if (!claims.get("purpose").equals(TokenPurpose.REFRESH)) {
-            throw new InvalidJwtPurposeException("Specified token is not a refresh token.");
+    public String createPasswordResetToken(final User user) {
+        final byte[] token;
+        try {
+            token = jwtUtil.createPasswordResetToken(user, Duration.ofMinutes(5)).getBytes(StandardCharsets.UTF_8);
+        } catch (JOSEException ex) {
+            logger.error("Failed to create account password reset token", ex);
+            return null;
         }
 
-        User user = userService.findUserById(UUID.fromString(claims.getSubject()))
-                .orElseThrow(() -> new IllegalStateException("User does not exist."));
+        return Base64.getEncoder().encodeToString(token);
+    }
 
-        UUID sessionId = UUID.fromString(claims.get("sid").toString());
-        Session session = sessionRepository.findById(sessionId).orElse(null);
-        if (session == null || session.isExpired()) {
-            throw new SessionMissingOrExpiredException(String.format("Session %s is missing or expired.", sessionId));
+    public PasswordResetTokenValidationContext validatePasswordResetToken(final String encodedToken) {
+        final String token = decodeBase64(encodedToken);
+        if (null == token) {
+            return PasswordResetTokenValidationContext.NULL;
         }
 
-        return switch (type) {
-            case ACCESS -> createAccessToken(user);
-            case WEBSOCKET -> createWebsocketToken(user);
-        };
+        try {
+            return jwtUtil.validatePasswordResetToken(token);
+        } catch (ParseException | JOSEException ex) {
+            logger.error("Failed to validate account password reset token", ex);
+            return PasswordResetTokenValidationContext.NULL;
+        }
     }
 
-    public String createAccessToken(User user) {
-        return jwtUtil.createAccessToken(user);
-    }
+    private String decodeBase64(final String encoded) {
+        final byte[] tokenBytes;
+        try {
+            tokenBytes = Base64.getDecoder().decode(encoded);
+        } catch (IllegalArgumentException ex) {
+            logger.error("Tried to decode non-base64 content", ex);
+            return null;
+        }
 
-    public String createWebsocketToken(User user) {
-        return jwtUtil.createWebsocketToken(user);
-    }
-
-    public String createConfirmationToken(User user) {
-        return Base64.getEncoder().encodeToString(
-                jwtUtil.createConfirmationToken(user, Duration.ofMinutes(10))
-                        .getBytes(StandardCharsets.UTF_8)
-        );
-    }
-
-    public String createPasswordResetToken(User user) {
-        return Base64.getEncoder().encodeToString(
-                jwtUtil.createPasswordResetToken(user, Duration.ofMinutes(5))
-                        .getBytes(StandardCharsets.UTF_8)
-        );
+        return new String(tokenBytes, StandardCharsets.UTF_8);
     }
 }
