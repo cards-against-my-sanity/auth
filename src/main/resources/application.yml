@@ -31,16 +31,16 @@ spring:
         client:
           web:
             registration:
-              client-id: ${WEB_CLIENT_ID}
+              client-id: ${WEB_CLIENT_ID:clientId}
               client-authentication-methods:
                 - "none"
               authorization-grant-types:
                 - "authorization_code"
                 - "refresh_token"
               redirect-uris:
-                - ${WEB_CLIENT_REDIRECT_URI}
+                - ${WEB_CLIENT_REDIRECT_URI:https://example.com/oauth/complete}
               post-logout-redirect-uris:
-                - ${WEB_CLIENT_POST_LOGOUT_REDIRECT_URI}
+                - ${WEB_CLIENT_POST_LOGOUT_REDIRECT_URI:https://example.com}
               scopes:
                 - "openid"
                 - "profile"
