@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      th:fragment="layout(pageTitle, pageHeader, alert, content)"
+      class="h-full bg-gray-50">
+<head>
+    <title th:text="${pageTitle} + ' &ndash; InsanityID'"></title>
+    <link rel="stylesheet" th:href="@{/main.css}"/>
+</head>
+<body class="h-full">
+<div class="flex min-h-full flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div class="sm:mx-auto sm:w-full sm:max-w-md">
+        <h2 class="mt-6 text-center text-2xl/9 font-bold tracking-tight text-gray-900" th:text="${pageHeader}"></h2>
+    </div>
+
+    <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-[480px]">
+        <div class="bg-white px-6 py-12 shadow-sm sm:rounded-lg sm:px-12">
+            <div th:replace="~{fragments/alert :: alert(${alert})}"></div>
+            <div th:replace="${content}"></div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,7 +1,7 @@
 package dev.jacobandersen.cams.auth.validator;
 
-import dev.jacobandersen.cams.auth.annotation.PasswordMatches;
 import dev.jacobandersen.cams.auth.api.HasConfirmablePassword;
+import dev.jacobandersen.cams.auth.api.annotation.PasswordMatches;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
@@ -13,7 +13,10 @@ public class PasswordMatchesValidator implements ConstraintValidator<PasswordMat
         }
 
         context.disableDefaultConstraintViolation();
-        context.buildConstraintViolationWithTemplate(context.getDefaultConstraintMessageTemplate()).addConstraintViolation();
+        context.buildConstraintViolationWithTemplate(context.getDefaultConstraintMessageTemplate())
+                .addPropertyNode("passwordConfirmation")
+                .addConstraintViolation();
+
         return false;
     }
 }
