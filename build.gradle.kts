@@ -99,7 +99,6 @@ val npmBuild by tasks.registering(NpmTask::class) {
 	workingDir = frontendDir
 	args = listOf("run", "build")
 	inputs.file(frontendDirComputed("main.css"))
-	outputs.file(compiledCss)
 	dependsOn("npmInstall")
 }
 
