@@ -41,3 +41,7 @@ out/
 
 ## mac ##
 .DS_Store
+
+## npm ##
+src/main/frontend/node_modules
+src/main/resources/static/main.css

@@ -1,11 +1,9 @@
 package dev.jacobandersen.cams.auth.controller;
 
-import dev.jacobandersen.cams.auth.dto.ConfirmAccountRequestDto;
-import dev.jacobandersen.cams.auth.dto.EmailRequestBodyDto;
-import dev.jacobandersen.cams.auth.dto.ResetPasswordRequestDto;
-import dev.jacobandersen.cams.auth.dto.SignUpRequestDto;
+import dev.jacobandersen.cams.auth.dto.*;
 import dev.jacobandersen.cams.auth.email.ConfirmAccountEmail;
 import dev.jacobandersen.cams.auth.email.ForgotPasswordEmail;
+import dev.jacobandersen.cams.auth.model.Alert;
 import dev.jacobandersen.cams.auth.model.User;
 import dev.jacobandersen.cams.auth.security.token.TokenValidationResult;
 import dev.jacobandersen.cams.auth.service.EmailService;
@@ -25,7 +23,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("user")
-public class UserController {
+public class UserController extends BaseController {
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     private final UserService userService;
@@ -42,21 +40,19 @@ public class UserController {
     }
 
     @GetMapping("signup")
-    public String signupForm(Model model, @ModelAttribute("error") String error) {
-        model.addAttribute("error", error);
-        model.addAttribute("signUpRequest", new SignUpRequestDto());
-        return "signup";
+    public String signupForm(@ModelAttribute("signUpRequest") SignUpRequestDto dto, @ModelAttribute("alert") Alert alert) {
+        return SIGNUP_PAGE;
     }
 
     @PostMapping("signup")
     public String signup(@Valid @ModelAttribute("signUpRequest") SignUpRequestDto dto, BindingResult result, Model model, RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
-            return "signup";
+            return SIGNUP_PAGE;
         }
 
         if (userService.exists(dto.getEmail(), dto.getNickname())) {
-            model.addAttribute("error", "An account with that email or nickname already exists.");
-            return "signup";
+            addAlert(model, Alert.error("An account with that email or nickname already exists"));
+            return SIGNUP_PAGE;
         }
 
         final User user = userService.createUser(dto);
@@ -65,38 +61,41 @@ public class UserController {
             emailService.sendMail(new ConfirmAccountEmail(user, confirmationToken));
         } catch (MessagingException ex) {
             logger.warn("signup: failed to send confirmation email", ex);
-            model.addAttribute("error", "Failed to send confirmation email. Please try again later.");
-            return "signup";
+            userService.deleteUser(user);
+            addAlert(model, Alert.error("A system error has occurred. Please try again later."));
+            return SIGNUP_PAGE;
         }
 
-        redirectAttributes.addFlashAttribute("message", "Sign up successful. Please check your email to confirm your account.");
-        return "redirect:/login";
+        addFlashAlert(redirectAttributes, Alert.success("Sign up successful. Please check your email to confirm your account."));
+        return REDIRECT_TO_LOGIN_PAGE;
     }
 
-    @PostMapping("confirm")
-    public String confirm(@Valid @ModelAttribute("confirmAccountRequest") ConfirmAccountRequestDto dto, BindingResult result, Model model, RedirectAttributes redirectAttributes) {
-        if (result.hasErrors()) {
-            return "confirm";
+    @GetMapping("confirm")
+    public String confirm(@ModelAttribute("confirmAccountRequest") ConfirmAccountRequestDto dto, RedirectAttributes redirectAttributes) {
+        if (null == dto.getToken()) {
+            addFlashAlert(redirectAttributes, Alert.error("Confirmation token was not provided. Do you need to request a new confirmation email?"));
+            return "redirect:/user/resend_confirmation";
         }
 
         final TokenValidationResult validationResult = tokenValidationService.validateConfirmationToken(dto.getToken());
         if (validationResult.isError()) {
-            model.addAttribute("error", validationResult.error());
-            return "confirm";
+            addFlashAlert(redirectAttributes, Alert.error(validationResult.error()));
+            return "redirect:/user/resend_confirmation";
         }
 
         final User user = validationResult.user();
-        if (!user.isConfirmed()) {
+        if (user.isConfirmed()) {
+            addFlashAlert(redirectAttributes, Alert.info("Your account is already confirmed."));
+        } else {
+            addFlashAlert(redirectAttributes, Alert.success("Your account has been confirmed. You may now log in."));
             userService.setUserConfirmed(user);
         }
 
-        redirectAttributes.addFlashAttribute("message", "Your account has been confirmed. You may now log in.");
-        return "redirect:/login";
+        return REDIRECT_TO_LOGIN_PAGE;
     }
 
     @GetMapping("resend_confirmation")
-    public String resendConfirmationForm(Model model, @ModelAttribute("error") String error) {
-        model.addAttribute("error", error);
+    public String resendConfirmationForm(@ModelAttribute("resendConfirmationRequest") EmailRequestBodyDto dto, @ModelAttribute("alert") Alert alert) {
         return "resend_confirmation";
     }
 
@@ -109,42 +108,51 @@ public class UserController {
         final User user = userService.findUserByEmail(dto.getEmail()).orElse(null);
         if (user != null) {
             if (user.isConfirmed()) {
-                // TODO: account already confirmed email, don't reveal to user that account exists for this email
+                addFlashAlert(redirectAttributes, Alert.info("The requested account is already confirmed."));
             } else {
                 try {
                     emailService.sendMail(new ConfirmAccountEmail(user, tokenService.createConfirmationToken(user)));
+                    addFlashAlert(redirectAttributes, Alert.info("We have sent a new confirmation email. Please check your email to confirm your account."));
                 } catch (MessagingException ex) {
-                    model.addAttribute("error", "A system error has occurred. Please try again later.");
+                    addAlert(model, Alert.error("A system error has occurred. Please try again later."));
                 }
             }
         }
 
-        redirectAttributes.addFlashAttribute("message", "We have sent a new confirmation email. Please check your email to confirm your account.");
-        return "redirect:/login";
+        return REDIRECT_TO_LOGIN_PAGE;
+    }
+
+    @GetMapping("reset_password")
+    public String resetPasswordForm(@ModelAttribute("resetPasswordRequest") ResetPasswordRequestDto dto, @ModelAttribute("alert") Alert alert, RedirectAttributes redirectAttributes) {
+        if (null == dto.getToken()) {
+            addFlashAlert(redirectAttributes, Alert.error("Reset password token was not provided. Do you need to request a password reset?"));
+            return "redirect:/user/forgot_password";
+        }
+
+        return "reset_password";
     }
 
     @PostMapping("reset_password")
-    public String resetPassword(@Valid @RequestBody ResetPasswordRequestDto dto, BindingResult result, Model model, RedirectAttributes redirectAttributes) {
+    public String resetPassword(@Valid @ModelAttribute("resetPasswordRequest") ResetPasswordRequestDto dto, BindingResult result, Model model, RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
             return "reset_password";
         }
 
         final TokenValidationResult validationResult = tokenValidationService.validatePasswordResetToken(dto.getToken());
         if (validationResult.isError()) {
-            model.addAttribute("error", validationResult.error());
-            return "reset_password";
+            addFlashAlert(redirectAttributes, Alert.error(validationResult.error()));
+            return "redirect:/user/forgot_password";
         }
 
         final User user = validationResult.user();
-        userService.updateUserPassword(user, dto.getNewPassword());
+        userService.updateUserPassword(user, dto.getPassword());
 
-        redirectAttributes.addFlashAttribute("message", "Your password has been reset. You may now log in.");
+        addFlashAlert(redirectAttributes, Alert.success("Your password has been reset. You may now log in."));
         return "redirect:/login";
     }
 
     @GetMapping("forgot_password")
-    public String forgotPasswordForm(Model model, @ModelAttribute("error") String error) {
-        model.addAttribute("error", error);
+    public String forgotPasswordForm(@ModelAttribute("forgotPasswordRequest") EmailRequestBodyDto dto, @ModelAttribute("alert") Alert alert) {
         return "forgot_password";
     }
 
@@ -159,11 +167,11 @@ public class UserController {
             try {
                 emailService.sendMail(new ForgotPasswordEmail(user, tokenService.createPasswordResetToken(user)));
             } catch (MessagingException ex) {
-                model.addAttribute("error", "A system error has occurred. Please try again later.");
+                addAlert(model, Alert.error("A system error has occurred. Please try again later."));
             }
         }
 
-        redirectAttributes.addFlashAttribute("message", "We have sent you a link to reset your password. Please check your email.");
+        addFlashAlert(redirectAttributes, Alert.info("We have sent you a link to reset your password. Please check your email."));
         return "redirect:/login";
     }
 }

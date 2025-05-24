@@ -12,11 +12,11 @@ public class ResetPasswordRequestDto implements HasConfirmablePassword {
 
     @NotBlank(message = "New password must be specified")
     @Size(min = 8, message = "New password must be at least 8 characters long")
-    private String newPassword;
+    private String password;
 
     @NotBlank(message = "New password confirmation must be specified")
     @Size(min = 8, message = "New password confirmation must be at least 8 characters long")
-    private String newPasswordConfirmation;
+    private String passwordConfirmation;
 
     public String getToken() {
         return token;
@@ -26,29 +26,21 @@ public class ResetPasswordRequestDto implements HasConfirmablePassword {
         this.token = token;
     }
 
-    public String getNewPassword() {
-        return newPassword;
-    }
-
-    public void setNewPassword(String newPassword) {
-        this.newPassword = newPassword;
-    }
-
     @Override
     public String getPassword() {
-        return getNewPassword();
+        return password;
     }
 
-    public String getNewPasswordConfirmation() {
-        return newPasswordConfirmation;
-    }
-
-    public void setNewPasswordConfirmation(String newPasswordConfirmation) {
-        this.newPasswordConfirmation = newPasswordConfirmation;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     @Override
     public String getPasswordConfirmation() {
-        return getNewPasswordConfirmation();
+        return passwordConfirmation;
+    }
+
+    public void setPasswordConfirmation(String passwordConfirmation) {
+        this.passwordConfirmation = passwordConfirmation;
     }
 }

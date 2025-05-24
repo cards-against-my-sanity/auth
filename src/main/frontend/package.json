@@ -1,0 +1,16 @@
+{
+  "name": "frontend",
+  "private": true,
+  "scripts": {
+    "clean": "rimraf ../resources/static/main.css",
+    "compile": "tailwindcss -i ./main.css -o ../resources/static/main.css --minify",
+    "watch": "tailwindcss -i ./main.css -o ../resources/static/main.css --minify --watch",
+    "build": "npm run clean && npm run compile",
+    "dev": "npm run clean && npm run watch"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.1.7",
+    "rimraf": "^6.0.1",
+    "tailwindcss": "^4.1.7"
+  }
+}

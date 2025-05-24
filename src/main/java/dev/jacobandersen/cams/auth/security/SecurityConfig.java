@@ -40,13 +40,17 @@ public class SecurityConfig {
         return http
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(authorize ->
-                        authorize.anyRequest().permitAll()
+                        authorize.requestMatchers("/").authenticated()
+                                .requestMatchers("/login", "/user/**").not().authenticated()
+                                .anyRequest().permitAll()
                 )
                 .formLogin(login ->
                         login
                                 .loginPage("/login")
                                 .failureHandler(authenticationFailureHandler())
                 )
+                .rememberMe(Customizer.withDefaults())
+                .exceptionHandling(ex -> ex.accessDeniedPage("/"))
                 .build();
     }
 

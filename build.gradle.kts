@@ -1,10 +1,14 @@
+import com.github.gradle.node.npm.task.NpmInstallTask
+import com.github.gradle.node.npm.task.NpmTask
+
 plugins {
 	java
+	jacoco
 	id("org.springframework.boot") version "3.4.0"
 	id("io.spring.dependency-management") version "1.1.6"
 	id("org.hibernate.orm") version "6.6.2.Final"
 	id("org.sonarqube") version "6.1.0.5360"
-	jacoco
+	id("com.github.node-gradle.node") version "7.1.0"
 }
 
 group = "dev.jacobandersen.cams"
@@ -51,6 +55,7 @@ dependencies {
 	implementation("commons-validator:commons-validator:${commonsValidatorVersion}")
 	implementation("org.bouncycastle:bcprov-jdk18on:${bouncycastleVersion}")
 	implementation("org.bouncycastle:bcpkix-jdk18on:${bouncycastleVersion}")
+	implementation("nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	runtimeOnly("io.micrometer:micrometer-registry-prometheus")
 	runtimeOnly("org.mariadb.jdbc:mariadb-java-client")
@@ -68,6 +73,38 @@ hibernate {
 	enhancement {
 		enableAssociationManagement = true
 	}
+}
+
+val frontendDir = file("$projectDir/src/main/frontend")
+val compiledCss = file("$projectDir/src/main/resources/static/main.css")
+
+node {
+	version = "20.18.0"
+	download = true
+	nodeProjectDir = frontendDir
+}
+
+fun frontendDirComputed(path: String): String {
+	return "${frontendDir.path}/$path"
+}
+
+tasks.named<NpmInstallTask>("npmInstall") {
+	workingDir = frontendDir
+	inputs.files(frontendDirComputed("package.json"), frontendDirComputed("package-lock.json"))
+	outputs.dir(frontendDirComputed("node_modules"))
+	finalizedBy(npmBuild)
+}
+
+val npmBuild by tasks.registering(NpmTask::class) {
+	workingDir = frontendDir
+	args = listOf("run", "build")
+	inputs.file(frontendDirComputed("main.css"))
+	outputs.file(compiledCss)
+	dependsOn("npmInstall")
+}
+
+tasks.processResources {
+	dependsOn(npmBuild)
 }
 
 val coverageExclusions = arrayOf(

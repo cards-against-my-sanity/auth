@@ -59,3 +59,8 @@ auth:
 logging:
   level:
     root: ${LOG_LEVEL:INFO}
+
+gg:
+  jte:
+    development-mode: on
+    template-location: src/main/resources/templates
