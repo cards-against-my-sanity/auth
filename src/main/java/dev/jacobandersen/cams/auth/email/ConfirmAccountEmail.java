@@ -1,27 +1,33 @@
 package dev.jacobandersen.cams.auth.email;
 
 import dev.jacobandersen.cams.auth.model.User;
-import jakarta.mail.MessagingException;
-import org.springframework.mail.javamail.MimeMessageHelper;
+import org.thymeleaf.context.Context;
+import org.thymeleaf.context.IContext;
 
-public class ConfirmAccountEmail extends CamsEmail {
+public class ConfirmAccountEmail extends BaseEmail {
     private final User user;
-    private final String url;
+    private final String token;
 
     public ConfirmAccountEmail(User user, String token) {
+        super("confirm-account");
         this.user = user;
-        url = String.format("http://localho.st:3000/auth/confirm/%s", token);
+        this.token = token;
     }
 
     @Override
-    public void defineMessage(MimeMessageHelper message) throws MessagingException {
-        message.setFrom("jacob@algorithmjunkie.com");
-        message.setTo(user.getEmail());
-        message.setSubject("Confirm Account at Cards Against my Sanity");
-        message.setText("Hey there " + user.getNickname() + "!<br /><br />" +
-                "Someone (hopefully you) has created an account at Cards Against my Sanity. " +
-                "Before you can log in and play, please confirm your account at the link below:<br /><br />" +
-                String.format("<a href=\"%s\">%s</a>", url, url) + "<br />" +
-                "<br />Please note: This link will expire in ten minutes. If you don't use it before then, you will need to request a new one.", true);
+    public String getRecipient() {
+        return user.getEmail();
+    }
+
+    @Override
+    public String getSubject() {
+        return "Confirm your InsanityID Account";
+    }
+
+    @Override
+    public IContext fillContext(Context context) {
+        context.setVariable("nickname", user.getNickname());
+        context.setVariable("token", token);
+        return context;
     }
 }

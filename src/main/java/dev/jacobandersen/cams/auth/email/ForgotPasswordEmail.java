@@ -1,28 +1,33 @@
 package dev.jacobandersen.cams.auth.email;
 
 import dev.jacobandersen.cams.auth.model.User;
-import jakarta.mail.MessagingException;
-import org.springframework.mail.javamail.MimeMessageHelper;
+import org.thymeleaf.context.Context;
+import org.thymeleaf.context.IContext;
 
-public class ForgotPasswordEmail extends CamsEmail {
+public class ForgotPasswordEmail extends BaseEmail {
     private final User user;
-    private final String url;
+    private final String token;
 
     public ForgotPasswordEmail(User user, String token) {
+        super("forgot-password");
         this.user = user;
-        url = String.format("http://localho.st:3000/auth/reset_password/%s", token);
+        this.token = token;
     }
 
     @Override
-    public void defineMessage(MimeMessageHelper message) throws MessagingException {
-        message.setFrom("jacob@algorithmjunkie.com");
-        message.setTo(user.getEmail());
-        message.setSubject("Forgotten Password at Cards Against my Sanity");
-        message.setText("Hey there " + user.getNickname() + "!<br /><br />" +
-                "Someone (hopefully you) has requested a password reset link for Cards Against my Sanity. " +
-                "If you have forgotten your password, click the link below to set a new one:<br /><br />" +
-                String.format("<a href=\"%s\">%s</a>", url, url) + "<br />" +
-                "<br />Please note: This link will expire in five minutes. If you don't use it before then, you will need to request a new one.<br /><br />" +
-                "If you did not request this link, please ignore this email - there is nothing you need to do.", true);
+    public String getRecipient() {
+        return user.getEmail();
+    }
+
+    @Override
+    public String getSubject() {
+        return "Forgotten InsanityID Password";
+    }
+
+    @Override
+    public IContext fillContext(Context context) {
+        context.setVariable("nickname", user.getNickname());
+        context.setVariable("token", token);
+        return context;
     }
 }

@@ -1,6 +1,9 @@
 server:
   port: ${SERVER_PORT:8080}
 
+app:
+  base-url: ${APP_BASE_URL:http://localhost:8080}
+
 spring:
   application:
     name: cams-auth
@@ -20,6 +23,7 @@ spring:
         transport:
           protocol: smtp
         smtp:
+          from: ${SMTP_FROM:root@localhost}
           port: ${SMTP_PORT:587}
           auth: ${SMTP_USE_AUTH:true}
           starttls:
@@ -59,8 +63,3 @@ auth:
 logging:
   level:
     root: ${LOG_LEVEL:INFO}
-
-gg:
-  jte:
-    development-mode: on
-    template-location: src/main/resources/templates
