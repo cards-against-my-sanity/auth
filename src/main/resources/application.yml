@@ -48,6 +48,7 @@ spring:
               scopes:
                 - "openid"
                 - "profile"
+                - "email"
             require-authorization-consent: false
             require-proof-key: true
   mvc:
