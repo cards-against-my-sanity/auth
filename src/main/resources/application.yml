@@ -50,11 +50,11 @@ spring:
                 - "profile"
             require-authorization-consent: false
             require-proof-key: true
-        issuer: ${AUTH_SERVER_ISSUER:https://example.com}
   mvc:
     log-request-details: ${LOG_REQUEST_DETAILS:false}
 
 auth:
+  jwt-issuer-uri: ${AUTH_SERVER_ISSUER_URI:https://example.com}
   key:
     id: ${AUTH_KEY_ID:}
     path:
