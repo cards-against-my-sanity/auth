@@ -5,16 +5,20 @@ import dev.jacobandersen.cams.auth.model.Role;
 import dev.jacobandersen.cams.auth.model.User;
 import dev.jacobandersen.cams.auth.repo.RoleRepository;
 import dev.jacobandersen.cams.auth.repo.UserRepository;
+import org.ietf.jgss.Oid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService implements UserDetailsService {
@@ -81,5 +85,19 @@ public class UserService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return findUserByEmail(username).orElseThrow(() -> new UsernameNotFoundException(username));
+    }
+
+    public Optional<OidcUserInfo> loadOidcUserInfoByEmail(final String email) {
+        return findUserByEmail(email).map(this::convertToOidcUserInfo);
+    }
+
+    public OidcUserInfo convertToOidcUserInfo(final User user) {
+        return OidcUserInfo.builder()
+                .subject(user.getId().toString())
+                .email(user.getEmail())
+                .emailVerified(user.isConfirmed())
+                .preferredUsername(user.getNickname())
+                .claim("roles", user.getRoles().stream().map(Role::getName).collect(Collectors.joining(",")))
+                .build();
     }
 }
