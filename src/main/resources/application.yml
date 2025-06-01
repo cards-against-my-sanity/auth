@@ -36,8 +36,9 @@ spring:
           web:
             registration:
               client-id: ${WEB_CLIENT_ID:clientId}
+              client-secret: ${WEB_CLIENT_SECRET:clientSecret}
               client-authentication-methods:
-                - "none"
+                - "client_secret_basic"
               authorization-grant-types:
                 - "authorization_code"
                 - "refresh_token"

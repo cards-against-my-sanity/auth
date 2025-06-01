@@ -11,8 +11,16 @@ plugins {
 	id("com.github.node-gradle.node") version "7.1.0"
 }
 
-group = "dev.jacobandersen.cams"
-version = "0.0.4-SNAPSHOT"
+group = "dev.jacobandersen.cam"
+
+val versionBase = "0.0.1-SNAPSHOT"
+val isSnapshot = versionBase.endsWith("-SNAPSHOT")
+if (isSnapshot) {
+	val gitHash = "git rev-parse --short HEAD".runCommand()?.trim() ?: "unknown"
+	version = "$versionBase-$gitHash"
+} else {
+	version = versionBase
+}
 
 java {
 	toolchain {
@@ -163,3 +171,12 @@ tasks.jacocoTestCoverageVerification {
 		}
 	}
 }
+
+// helper
+fun String.runCommand(): String? =
+	ProcessBuilder(*split(" ").toTypedArray())
+		.redirectErrorStream(true)
+		.start()
+		.inputStream
+		.bufferedReader()
+		.readText()
