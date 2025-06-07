@@ -1,4 +1,4 @@
-package dev.jacobandersen.cams.auth.model;
+package dev.jacobandersen.cams.auth.model.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;

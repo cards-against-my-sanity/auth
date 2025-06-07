@@ -3,7 +3,7 @@ package dev.jacobandersen.cams.auth.security.token;
 import com.nimbusds.jose.*;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import dev.jacobandersen.cams.auth.model.User;
+import dev.jacobandersen.cams.auth.model.domain.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.lang.NonNull;

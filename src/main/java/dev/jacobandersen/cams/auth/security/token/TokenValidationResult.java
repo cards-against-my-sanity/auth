@@ -1,6 +1,6 @@
 package dev.jacobandersen.cams.auth.security.token;
 
-import dev.jacobandersen.cams.auth.model.User;
+import dev.jacobandersen.cams.auth.model.domain.User;
 
 public record TokenValidationResult(User user, String error) {
     public static TokenValidationResult success(User user) {

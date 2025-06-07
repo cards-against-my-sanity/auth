@@ -1,6 +1,6 @@
 package dev.jacobandersen.cams.auth.controller;
 
-import dev.jacobandersen.cams.auth.model.Alert;
+import dev.jacobandersen.cams.auth.model.template.Alert;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.ui.Model;

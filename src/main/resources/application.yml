@@ -11,7 +11,7 @@ spring:
     hibernate:
       ddl-auto: ${DDL_AUTO:validate}
   datasource:
-    url: jdbc:mariadb://${DB_HOST}:${DB_PORT}/${DB_SCHEMA_NAME}
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_SCHEMA_NAME}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
   mail:
@@ -52,6 +52,8 @@ spring:
                 - "email"
             require-authorization-consent: false
             require-proof-key: true
+            token:
+              refresh-token-time-to-live:
   mvc:
     log-request-details: ${LOG_REQUEST_DETAILS:false}
 

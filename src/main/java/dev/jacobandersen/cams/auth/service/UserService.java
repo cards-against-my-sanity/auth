@@ -1,18 +1,16 @@
 package dev.jacobandersen.cams.auth.service;
 
 import dev.jacobandersen.cams.auth.dto.SignUpRequestDto;
-import dev.jacobandersen.cams.auth.model.Role;
-import dev.jacobandersen.cams.auth.model.User;
+import dev.jacobandersen.cams.auth.model.domain.Role;
+import dev.jacobandersen.cams.auth.model.domain.User;
 import dev.jacobandersen.cams.auth.repo.RoleRepository;
 import dev.jacobandersen.cams.auth.repo.UserRepository;
-import org.ietf.jgss.Oid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
-import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

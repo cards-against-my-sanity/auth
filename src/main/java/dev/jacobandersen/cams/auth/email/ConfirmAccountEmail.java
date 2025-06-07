@@ -1,6 +1,6 @@
 package dev.jacobandersen.cams.auth.email;
 
-import dev.jacobandersen.cams.auth.model.User;
+import dev.jacobandersen.cams.auth.model.domain.User;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.context.IContext;
 

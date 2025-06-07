@@ -1,6 +1,6 @@
 package dev.jacobandersen.cams.auth.repo;
 
-import dev.jacobandersen.cams.auth.model.Role;
+import dev.jacobandersen.cams.auth.model.domain.Role;
 import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,6 +1,6 @@
 package dev.jacobandersen.cams.auth.controller;
 
-import dev.jacobandersen.cams.auth.model.User;
+import dev.jacobandersen.cams.auth.model.domain.User;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

@@ -1,7 +1,7 @@
 package dev.jacobandersen.cams.auth.service;
 
 import com.nimbusds.jose.JOSEException;
-import dev.jacobandersen.cams.auth.model.User;
+import dev.jacobandersen.cams.auth.model.domain.User;
 import dev.jacobandersen.cams.auth.security.token.ConfirmationTokenValidationContext;
 import dev.jacobandersen.cams.auth.security.token.JwtUtil;
 import dev.jacobandersen.cams.auth.security.token.PasswordResetTokenValidationContext;

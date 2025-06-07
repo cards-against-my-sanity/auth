@@ -1,4 +1,4 @@
-package dev.jacobandersen.cams.auth.model;
+package dev.jacobandersen.cams.auth.model.template;
 
 import org.springframework.lang.NonNull;
 

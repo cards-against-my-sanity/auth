@@ -1,6 +1,6 @@
 package dev.jacobandersen.cams.auth.service;
 
-import dev.jacobandersen.cams.auth.model.Role;
+import dev.jacobandersen.cams.auth.model.domain.Role;
 import dev.jacobandersen.cams.auth.repo.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

@@ -1,6 +1,6 @@
 package dev.jacobandersen.cams.auth.service;
 
-import dev.jacobandersen.cams.auth.model.User;
+import dev.jacobandersen.cams.auth.model.domain.User;
 import dev.jacobandersen.cams.auth.security.token.TokenValidationContext;
 import dev.jacobandersen.cams.auth.security.token.TokenValidationResult;
 import org.springframework.beans.factory.annotation.Autowired;

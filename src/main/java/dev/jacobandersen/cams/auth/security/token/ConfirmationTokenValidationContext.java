@@ -1,7 +1,7 @@
 package dev.jacobandersen.cams.auth.security.token;
 
 import com.nimbusds.jwt.JWTClaimsSet;
-import dev.jacobandersen.cams.auth.model.User;
+import dev.jacobandersen.cams.auth.model.domain.User;
 import org.springframework.lang.NonNull;
 
 public final class ConfirmationTokenValidationContext extends TokenValidationContext {
