@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 public class BaseController {
-    private static final String ALERT_KEY = "alert";
     protected static final String SIGNUP_PAGE = "signup";
     protected static final String REDIRECT_TO_LOGIN_PAGE = "redirect:/login";
+    private static final String ALERT_KEY = "alert";
 
     public final void addAlert(final Model model, final Alert alert) {
         model.addAttribute(ALERT_KEY, alert);

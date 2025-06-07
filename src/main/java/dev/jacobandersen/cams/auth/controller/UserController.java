@@ -1,10 +1,13 @@
 package dev.jacobandersen.cams.auth.controller;
 
-import dev.jacobandersen.cams.auth.dto.*;
+import dev.jacobandersen.cams.auth.dto.ConfirmAccountRequestDto;
+import dev.jacobandersen.cams.auth.dto.EmailRequestBodyDto;
+import dev.jacobandersen.cams.auth.dto.ResetPasswordRequestDto;
+import dev.jacobandersen.cams.auth.dto.SignUpRequestDto;
 import dev.jacobandersen.cams.auth.email.ConfirmAccountEmail;
 import dev.jacobandersen.cams.auth.email.ForgotPasswordEmail;
-import dev.jacobandersen.cams.auth.model.template.Alert;
 import dev.jacobandersen.cams.auth.model.domain.User;
+import dev.jacobandersen.cams.auth.model.template.Alert;
 import dev.jacobandersen.cams.auth.security.token.TokenValidationResult;
 import dev.jacobandersen.cams.auth.service.EmailService;
 import dev.jacobandersen.cams.auth.service.TokenService;
@@ -18,7 +21,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
