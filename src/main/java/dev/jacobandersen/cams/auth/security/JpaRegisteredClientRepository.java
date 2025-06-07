@@ -17,10 +17,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Component
 public class JpaRegisteredClientRepository implements RegisteredClientRepository {
@@ -46,7 +43,7 @@ public class JpaRegisteredClientRepository implements RegisteredClientRepository
     @Override
     public RegisteredClient findById(String id) {
         Assert.hasText(id, "id cannot be empty");
-        return this.clientRepository.findById(id).map(this::toObject).orElse(null);
+        return this.clientRepository.findById(UUID.fromString(id)).map(this::toObject).orElse(null);
     }
 
     @Override
@@ -67,7 +64,7 @@ public class JpaRegisteredClientRepository implements RegisteredClientRepository
         Set<String> clientScopes = StringUtils.commaDelimitedListToSet(
                 client.getScopes());
 
-        RegisteredClient.Builder builder = RegisteredClient.withId(client.getId())
+        RegisteredClient.Builder builder = RegisteredClient.withId(client.getId().toString())
                 .clientId(client.getClientId())
                 .clientIdIssuedAt(client.getClientIdIssuedAt())
                 .clientSecret(client.getClientSecret())
@@ -102,7 +99,7 @@ public class JpaRegisteredClientRepository implements RegisteredClientRepository
                 authorizationGrantTypes.add(authorizationGrantType.getValue()));
 
         Client entity = new Client();
-        entity.setId(registeredClient.getId());
+        entity.setId(UUID.fromString(registeredClient.getId()));
         entity.setClientId(registeredClient.getClientId());
         entity.setClientIdIssuedAt(registeredClient.getClientIdIssuedAt());
         entity.setClientSecret(registeredClient.getClientSecret());

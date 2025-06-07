@@ -1,20 +1,37 @@
 create table oauth_client
 (
-    id                            varchar(255)            not null,
-    client_id                     varchar(255)            not null,
-    client_id_issued_at           timestamp default now() not null,
-    client_secret                 varchar(255),
+    id                            uuid          not null default gen_random_uuid(),
+    client_id                     varchar(64)   not null default encode(sha256(gen_random_bytes(32)), 'hex'),
+    client_id_issued_at           timestamp              default now() not null,
+    client_secret                 varchar(128),
     client_secret_expires_at      timestamp,
-    client_name                   varchar(255)            not null,
-    client_authentication_methods varchar(1000)           not null,
-    authorization_grant_types     varchar(1000)           not null,
+    client_name                   varchar(255)  not null,
+    client_authentication_methods varchar(1000) not null,
+    authorization_grant_types     varchar(1000) not null,
     redirect_uris                 varchar(1000),
     post_logout_redirect_uris     varchar(1000),
-    scopes                        varchar(1000)           not null,
-    client_settings               varchar(2000)           not null,
-    token_settings                varchar(2000)           not null,
+    scopes                        varchar(1000) not null,
+    client_settings               varchar(2000) not null,
+    token_settings                varchar(2000) not null,
     primary key (id)
 );
+
+create function oauth_client__hash_client_secret()
+    returns trigger as $$
+    begin
+        if new.client_secret is not null then
+            new.client_secret :=
+                    concat('{bcrypt(sha512)}', crypt(encode(sha512(new.client_secret::bytea), 'hex'), gen_salt('bf', 12)));
+        end if;
+        return new;
+    end;
+    $$ language plpgsql;
+
+create trigger oauth_client__hash_client_secret_trigger
+    before insert or update
+    on oauth_client
+    for each row
+execute function oauth_client__hash_client_secret();
 
 create table oauth_authorization
 (

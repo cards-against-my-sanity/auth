@@ -6,12 +6,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 import java.time.Instant;
+import java.util.UUID;
 
 @Entity
 @Table(name = "oauth_client")
 public class Client {
     @Id
-    private String id;
+    private UUID id;
     private String clientId;
     private Instant clientIdIssuedAt;
     private String clientSecret;
@@ -32,11 +33,11 @@ public class Client {
     @Column(length = 2000)
     private String tokenSettings;
 
-    public String getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
