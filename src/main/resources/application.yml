@@ -29,31 +29,6 @@ spring:
           starttls:
             enable: ${SMTP_STARTTLS_ENABLE:true}
             required: ${SMTP_STARTTLS_REQUIRED:true}
-  security:
-    oauth2:
-      authorizationserver:
-        client:
-          web:
-            registration:
-              client-id: ${WEB_CLIENT_ID:clientId}
-              client-secret: ${WEB_CLIENT_SECRET:clientSecret}
-              client-authentication-methods:
-                - "client_secret_basic"
-              authorization-grant-types:
-                - "authorization_code"
-                - "refresh_token"
-              redirect-uris:
-                - ${WEB_CLIENT_REDIRECT_URI:https://example.com/oauth/complete}
-              post-logout-redirect-uris:
-                - ${WEB_CLIENT_POST_LOGOUT_REDIRECT_URI:https://example.com}
-              scopes:
-                - "openid"
-                - "profile"
-                - "email"
-            require-authorization-consent: false
-            require-proof-key: true
-            token:
-              refresh-token-time-to-live:
   mvc:
     log-request-details: ${LOG_REQUEST_DETAILS:false}
 
