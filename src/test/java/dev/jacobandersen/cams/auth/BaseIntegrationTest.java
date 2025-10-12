@@ -1,14 +1,11 @@
 package dev.jacobandersen.cams.auth;
 
-import dev.jacobandersen.cams.auth.security.RSAKeyService;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemWriter;
-import org.junit.jupiter.api.BeforeAll;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.MariaDBContainer;
+import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -28,10 +25,11 @@ public abstract class BaseIntegrationTest {
 
     @Container
     @SuppressWarnings("resource")
-    static MariaDBContainer<?> mariadb = new MariaDBContainer<>("mariadb:latest")
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:latest")
             .withDatabaseName("cams_auth")
             .withUsername("test")
             .withPassword("test")
+            .withInitScript("pg-init.sql")
             .waitingFor(Wait.forListeningPort());
 
     @Container
@@ -47,9 +45,9 @@ public abstract class BaseIntegrationTest {
 
         final KeyPair keyPair = keyPairGenerator.generateKeyPair();
 
-        registry.add("spring.datasource.url", mariadb::getJdbcUrl);
-        registry.add("spring.datasource.username", mariadb::getUsername);
-        registry.add("spring.datasource.password", mariadb::getPassword);
+        registry.add("spring.datasource.url", postgres::getJdbcUrl);
+        registry.add("spring.datasource.username", postgres::getUsername);
+        registry.add("spring.datasource.password", postgres::getPassword);
 
         registry.add("spring.mail.host", mailhog::getHost);
         registry.add("spring.mail.properties.mail.smtp.port", () -> mailhog.getMappedPort(MAILHOG_PORT_SMTP));

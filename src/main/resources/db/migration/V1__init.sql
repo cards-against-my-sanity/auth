@@ -2,7 +2,7 @@ create table users
 (
     id         uuid primary key             default gen_random_uuid(),
     email      varchar(255) unique not null,
-    password   varchar(128)         not null,
+    password   varchar(128)        not null,
     nickname   varchar(16) unique  not null,
     confirmed  boolean             not null default false,
     banned     boolean             not null default false,

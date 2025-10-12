@@ -9,7 +9,8 @@
       )}"
 >
 <div th:fragment="content">
-    <form class="space-y-6" th:action="@{/user/resend_confirmation}" th:object="${resendConfirmationRequest}" method="POST">
+    <form class="space-y-6" th:action="@{/user/resend_confirmation}" th:object="${resendConfirmationRequest}"
+          method="POST">
         <div th:replace="~{fragments/input :: input(type='email', name='email', id='email', autocomplete='email', labelText='Email address')}"></div>
         <div class="text-xs text-red-400" th:errors="*{email}" th:if="${#fields.hasErrors('email')}"></div>
         <div>
@@ -21,7 +22,8 @@
     </form>
     <div class="mt-10 flex flex-col gap-y-4 text-center text-sm/6 text-gray-500">
         <p>
-            Don't need to confirm? <a href="/login" class="font-semibold text-indigo-600 hover:text-indigo-500">Log in here</a>
+            Don't need to confirm? <a href="/login" class="font-semibold text-indigo-600 hover:text-indigo-500">Log in
+            here</a>
         </p>
     </div>
 </div>

@@ -18,20 +18,23 @@ create table oauth_client
 
 create function oauth_client__hash_client_secret()
     returns trigger as $$
-    begin
-        if new.client_secret is not null then
+begin
+        if
+new.client_secret is not null then
             new.client_secret :=
                     concat('{bcrypt(sha512)}', crypt(encode(sha512(new.client_secret::bytea), 'hex'), gen_salt('bf', 12)));
-        end if;
-        return new;
-    end;
-    $$ language plpgsql;
+end if;
+return new;
+end;
+    $$
+language plpgsql;
 
 create trigger oauth_client__hash_client_secret_trigger
-    before insert or update
+    before insert or
+update
     on oauth_client
     for each row
-execute function oauth_client__hash_client_secret();
+    execute function oauth_client__hash_client_secret();
 
 create table oauth_authorization
 (
