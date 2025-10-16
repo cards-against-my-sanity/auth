@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(
+        pageTitle='Add OAuth Client',
+        pageHeader='Add OAuth Client',
+        alert=${alert},
+        content=~{::content}
+      )}"
+>
+<div th:fragment="content">
+    <form class="space-y-6" th:action="@{/admin/oauth/clients/add}" th:object="${addClientRequest}" method="POST">
+        <div th:replace="~{fragments/input :: input(type='text', name='clientAuthenticationMethods', id='clientAuthenticationMethods', autocomplete='off', labelText='Client Authentication Method(s)')}"></div>
+        <div class="text-xs text-red-400" th:errors="*{clientAuthenticationMethods}"
+             th:if="${#fields.hasErrors('clientAuthenticationMethods')}"></div>
+        <div th:replace="~{fragments/input :: input(type='text', name='authorizationGrantTypes', id='authorizationGrantTypes', autocomplete='off', labelText='Authorization Grant Type(s)')}"></div>
+        <div class="text-xs text-red-400" th:errors="*{authorizationGrantTypes}"
+             th:if="${#fields.hasErrors('authorizationGrantTypes')}"></div>
+        <div th:replace="~{fragments/input :: input(type='text', name='scopes', id='scopes', autocomplete='off', labelText='Scope(s)')}"></div>
+        <div class="text-xs text-red-400" th:errors="*{scopes}" th:if="${#fields.hasErrors('scopes')}"></div>
+        <div th:replace="~{fragments/input :: input(type='text', name='redirectUris', id='redirectUris', autocomplete='off', labelText='Redirect URI(s)')}"></div>
+        <div class="text-xs text-red-400" th:errors="*{redirectUris}"
+             th:if="${#fields.hasErrors('redirectUris')}"></div>
+        <div th:replace="~{fragments/input :: input(type='text', name='postLogoutRedirectUris', id='postLogoutRedirectUris', autocomplete='off', labelText='Post-Logout Redirect URI(s)')}"></div>
+        <div class="text-xs text-red-400" th:errors="*{postLogoutRedirectUris}"
+             th:if="${#fields.hasErrors('postLogoutRedirectUris')}"></div>
+        <div th:replace="~{fragments/numeric_input :: numeric_input(name='accessTokenTimeToLiveSeconds', id='accessTokenTimeToLiveSeconds', initialValue='60', min='1', max='999999999', labelText='Access Token TTL Seconds')}"></div>
+        <div class="text-xs text-red-400" th:errors="*{accessTokenTimeToLiveSeconds}"
+             th:if="${#fields.hasErrors('accessTokenTimeToLiveSeconds')}"></div>
+        <div th:replace="~{fragments/numeric_input :: numeric_input(name='refreshTokenTimeToLiveSeconds', id='refreshTokenTimeToLiveSeconds', initialValue='3600', min='1', max='999999999', labelText='Refresh Token TTL Seconds')}"></div>
+        <div class="text-xs text-red-400" th:errors="*{refreshTokenTimeToLiveSeconds}"
+             th:if="${#fields.hasErrors('refreshTokenTimeToLiveSeconds')}"></div>
+        <div th:replace="~{fragments/checkbox :: checkbox(name='requireProofKey', id='requireProofKey', labelText = 'Require Proof Key?')}"></div>
+        <div th:replace="~{fragments/checkbox :: checkbox(name='requireAuthorizationConsent', id='requireAuthorizationConsent', labelText = 'Require Authorization Consent?')}"></div>
+        <div th:replace="~{fragments/checkbox :: checkbox(name='reuseRefreshTokens', id='reuseRefreshTokens', labelText = 'Reuse Refresh Tokens?')}"></div>
+        <div>
+            <button type="submit"
+                    class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                Add OAuth Client
+            </button>
+        </div>
+    </form>
+    <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.polyfills.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css" rel="stylesheet" type="text/css" />
+    <script>
+        new Tagify(document.querySelector("#authorizationGrantTypes"), {
+            whitelist: /*[[${clientAuthenticationMethodSuggestions}]]*/ ""
+        });
+
+        new Tagify(document.querySelector("#authorizationGrantTypes"), {
+            whitelist: /*[[${authorizationGrantTypeSuggestions}]]*/ ""
+        });
+
+        new Tagify(document.querySelector("#scopes"));
+
+        new Tagify(document.querySelector("#redirectUris"));
+
+        new Tagify(document.querySelector("#postLogoutRedirectUris"));
+    </script>
+</div>
+</html>

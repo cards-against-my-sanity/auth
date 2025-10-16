@@ -18,6 +18,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class JpaRegisteredClientRepository implements RegisteredClientRepository {
@@ -60,6 +61,10 @@ public class JpaRegisteredClientRepository implements RegisteredClientRepository
     public void save(RegisteredClient registeredClient) {
         Assert.notNull(registeredClient, "registeredClient cannot be null");
         this.clientRepository.save(toEntity(registeredClient));
+    }
+
+    public Set<RegisteredClient> findAll() {
+        return this.clientRepository.findAll().stream().map(this::toObject).collect(Collectors.toSet());
     }
 
     @Override
