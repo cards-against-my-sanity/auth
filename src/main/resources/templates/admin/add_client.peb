@@ -1,0 +1,44 @@
+{% extends "admin/admin_layout" %}
+
+{% import "../fragments/input" %}
+{% import "../fragments/numeric_input" %}
+{% import "../fragments/checkbox" %}
+
+{% block title %}Edit OAuth Client{% endblock %}
+{% block pageHeader %}Add OAuth Client{% endblock %}
+
+{% block extraHead %}
+<link href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css" rel="stylesheet" type="text/css"/>
+<script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
+<script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.polyfills.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div>
+    <form name='addClientForm' class="space-y-6" action="{{ href('/admin/oauth/clients/add') }}" method="POST">
+        {{ errorableInput(type='text', name='clientName', id='clientName', autocomplete='off', labelText='Client Name', required='true', formName='addClientForm') }}
+        {{ errorableInput(type='text', name='clientAuthenticationMethods', id='clientAuthenticationMethods', autocomplete='off', labelText='Client Authentication Method(s)', required='true', extraClass='tagify--custom-dropdown', formName='addClientForm') }}
+        {{ errorableInput(type='text', name='authorizationGrantTypes', id='authorizationGrantTypes', autocomplete='off', labelText='Authorization Grant Type(s)', required='true', extraClass='tagify--custom-dropdown', formName='addClientForm') }}
+        {{ errorableInput(type='text', name='scopes', id='scopes', autocomplete='off', labelText='Scope(s)', required='true', extraClass='tagify--custom-dropdown', formName='addClientForm') }}
+        {{ errorableInput(type='text', name='redirectUris', id='redirectUris', autocomplete='off', labelText='Redirect URI(s)', required='true', extraClass='tagify--custom-dropdown', formName='addClientForm') }}
+        {{ errorableInput(type='text', name='postLogoutRedirectUris', id='postLogoutRedirectUris', autocomplete='off', labelText='Post-Logout Redirect URI(s)', required='true', extraClass='tagify--custom-dropdown', formName='addClientForm') }}
+        {{ errorableNumericInput(name='accessTokenTimeToLiveSeconds', id='accessTokenTimeToLiveSeconds', initialValue='60', min='1', max='999999999', labelText='Access Token TTL Seconds', formName='addClientForm') }}
+        {{ errorableNumericInput(name='refreshTokenTimeToLiveSeconds', id='refreshTokenTimeToLiveSeconds', initialValue='3600', min='1', max='999999999', labelText='Refresh Token TTL Seconds', formName='addClientForm') }}
+        {{ checkbox(name='requireProofKey', id='requireProofKey', labelText='Require Proof Key?') }}
+        {{ checkbox(name='requireAuthorizationConsent', id='requireAuthorizationConsent', labelText='Require Authorization Consent?') }}
+        {{ checkbox(name='reuseRefreshTokens', id='reuseRefreshTokens', labelText='Reuse Refresh Tokens?') }}
+        {% include '../fragments/csrf' %}
+        
+        <div>
+            <button type="submit"
+                    class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                Add OAuth Client
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block preBodyEnd %}
+<script src="{{ href('/oauth_client_tagify.js') }}"></script>
+{% endblock %}

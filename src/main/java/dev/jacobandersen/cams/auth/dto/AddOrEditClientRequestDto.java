@@ -7,21 +7,24 @@ import jakarta.validation.constraints.NotEmpty;
 
 import java.util.List;
 
-public class AddClientRequestDto {
+public class AddOrEditClientRequestDto {
+    @NotBlank(message = "Client name must be specified")
+    private String clientName;
+
     @NotEmpty(message = "At least one client authentication method must be specified")
-    private List<@NotBlank String> clientAuthenticationMethods;
+    private List<String> clientAuthenticationMethods;
 
     @NotEmpty(message = "At least one authorization grant type must be specified")
-    private List<@NotBlank String> authorizationGrantTypes;
+    private List<String> authorizationGrantTypes;
 
-    @NotBlank(message = "At least one scope must be specified")
-    private List<@NotBlank(message = "A scope must not be blank") String> scopes;
+    @NotEmpty(message = "At least one scope must be specified")
+    private List<String> scopes;
 
-    @NotBlank(message = "At least one redirect URI must be specified")
-    private List<@NotBlank(message = "A redirect URI must not be blank") String> redirectUris;
+    @NotEmpty(message = "At least one redirect URI must be specified")
+    private List<String> redirectUris;
 
-    @NotBlank(message = "At least one post-logout redirect URI must be specified")
-    private List<@NotBlank(message = "A post-logout redirct URI must not be blank") String> postLogoutRedirectUris;
+    @NotEmpty(message = "At least one post-logout redirect URI must be specified")
+    private List<String> postLogoutRedirectUris;
 
     private boolean requireProofKey;
 
@@ -34,6 +37,14 @@ public class AddClientRequestDto {
 
     @Min(value = 1L, message = "Refresh token time to live must be at least one second")
     private long refreshTokenTimeToLiveSeconds;
+
+    public String getClientName() {
+        return clientName;
+    }
+
+    public void setClientName(String clientName) {
+        this.clientName = clientName;
+    }
 
     public List<String> getClientAuthenticationMethods() {
         return clientAuthenticationMethods;
@@ -113,5 +124,22 @@ public class AddClientRequestDto {
 
     public void setRefreshTokenTimeToLiveSeconds(long refreshTokenTimeToLiveSeconds) {
         this.refreshTokenTimeToLiveSeconds = refreshTokenTimeToLiveSeconds;
+    }
+
+    @Override
+    public String toString() {
+        return "AddClientRequestDto{" +
+                "clientName='" + clientName + '\'' +
+                ", clientAuthenticationMethods=" + clientAuthenticationMethods +
+                ", authorizationGrantTypes=" + authorizationGrantTypes +
+                ", scopes=" + scopes +
+                ", redirectUris=" + redirectUris +
+                ", postLogoutRedirectUris=" + postLogoutRedirectUris +
+                ", requireProofKey=" + requireProofKey +
+                ", requireAuthorizationConsent=" + requireAuthorizationConsent +
+                ", reuseRefreshTokens=" + reuseRefreshTokens +
+                ", accessTokenTimeToLiveSeconds=" + accessTokenTimeToLiveSeconds +
+                ", refreshTokenTimeToLiveSeconds=" + refreshTokenTimeToLiveSeconds +
+                '}';
     }
 }

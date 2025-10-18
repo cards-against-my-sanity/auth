@@ -43,3 +43,6 @@ auth:
 logging:
   level:
     root: ${LOG_LEVEL:INFO}
+
+pebble:
+  expose-request-attributes: true

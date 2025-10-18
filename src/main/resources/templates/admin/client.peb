@@ -1,0 +1,25 @@
+{# @pebvariable name="registeredClient" type="org.springframework.security.oauth2.server.authorization.client.RegisteredClient" #}
+    
+{% extends "admin/admin_layout" %}
+
+{% import '../fragments/data_section' %}
+
+{% block title %}{{ registeredClient.clientName }} - OAuth Client{% endblock %}
+{% block pageHeader %}{{ registeredClient.clientName }} - OAuth Client{% endblock %}
+
+{% block content %}
+<div class="flex flex-col gap-y-4">
+    <a href="{{ href('/admin/oauth/clients') }}" class="p-4 rounded-md bg-blue-400">Go back</a>
+    {{ dataSection(title='Client Name', data=registeredClient.clientName) }}
+    {{ dataSection(title='Client Authentication Methods', data=registeredClient.clientAuthenticationMethods) }}
+    {{ dataSection(title='Authorization Grant Types', data=registeredClient.authorizationGrantTypes) }}
+    {{ dataSection(title='Scopes', data=registeredClient.scopes) }}
+    {{ dataSection(title='Redirect URIs', data=registeredClient.redirectUris) }}
+    {{ dataSection(title='Post-Logout Redirect URIs', data=registeredClient.postLogoutRedirectUris) }}
+    {{ dataSection(title='Access Token TTL Seconds', data=registeredClient.tokenSettings.accessTokenTimeToLive.toSeconds()) }}
+    {{ dataSection(title='Refresh Token TTL Seconds', data=registeredClient.tokenSettings.refreshTokenTimeToLive.toSeconds()) }}
+    {{ dataSection(title='Require Proof Key', data=registeredClient.clientSettings.requireProofKey ? 'Yes' : 'No') }}
+    {{ dataSection(title='Require Authorization Consent', data=registeredClient.clientSettings.requireAuthorizationConsent ? 'Yes' : 'No') }}
+    {{ dataSection(title='Reuse Refresh Tokens', data=registeredClient.tokenSettings.reuseRefreshTokens ? 'Yes' : 'No') }}
+</div>
+{% endblock %}

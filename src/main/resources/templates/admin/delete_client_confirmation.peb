@@ -1,0 +1,19 @@
+{# @pebvariable name="registeredClient" type="org.springframework.security.oauth2.server.authorization.client.RegisteredClient" #}
+    
+{% extends "admin/admin_layout" %}
+
+{% block title %}{{ registeredClient.clientName }} - Delete OAuth Client{% endblock %}
+{% block pageHeader %}{{ registeredClient.clientName }} - Delete OAuth Client{% endblock %}
+
+{% block content %}
+<div class="flex flex-col gap-y-4">
+    <p>Are you sure you want to delete the client {{ registeredClient.clientName }}?</p>
+    <div class="flex gap-x-2">
+        <a href="{{ href('/admin/oauth/clients') }}" class="p-4 rounded-md bg-blue-400">No, go back</a>
+        <form action="{{ href('/admin/oauth/clients/' + registeredClient.id + '/delete') }}" method="post">
+            {% include '../fragments/csrf' %}
+            <button type="submit" class="p-4 rounded-md bg-red-400">Yes, delete</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

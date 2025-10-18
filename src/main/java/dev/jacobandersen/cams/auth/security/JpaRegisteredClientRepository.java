@@ -3,8 +3,10 @@ package dev.jacobandersen.cams.auth.security;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.jacobandersen.cams.auth.dto.AddOrEditClientRequestDto;
 import dev.jacobandersen.cams.auth.model.oauth.Client;
 import dev.jacobandersen.cams.auth.repo.ClientRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.security.jackson2.SecurityJackson2Modules;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
@@ -18,6 +20,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Component
@@ -61,6 +64,18 @@ public class JpaRegisteredClientRepository implements RegisteredClientRepository
     public void save(RegisteredClient registeredClient) {
         Assert.notNull(registeredClient, "registeredClient cannot be null");
         this.clientRepository.save(toEntity(registeredClient));
+    }
+
+    @Transactional
+    public void update(RegisteredClient registeredClient) {
+        Assert.notNull(registeredClient, "registeredClient cannot be null");
+        deleteById(registeredClient.getId());
+        save(registeredClient);
+    }
+
+    public void deleteById(String id) {
+        Assert.hasText(id, "id cannot be empty");
+        this.clientRepository.deleteById(UUID.fromString(id));
     }
 
     public Set<RegisteredClient> findAll() {

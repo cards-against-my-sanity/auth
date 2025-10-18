@@ -1,0 +1,24 @@
+{% extends "layout" %}
+
+{% block title %}Logged in{% endblock %}
+{% block pageHeader %}You are logged in{% endblock %}
+
+{% block content %}
+<div class="flex flex-col gap-y-8">
+    <p>Hello <span class="italic">{{ nickname }}</span>! You are logged in with your InsanityID. This is
+        the authorization server &mdash; there is not a lot to do here. You might be looking for one of our games, like
+        Cards Against my Sanity.</p>
+    <hr />
+    {% if isAdmin %}
+        <a href="{{ href('/admin/oauth/clients') }}" class="flex w-full justify-center rounded-md bg-indigo-600 text-white shadow-xs">View OAuth Clients</a>
+        <hr />
+    {% endif %}
+    <form action="{{ href('/logout') }}" method="post">
+        {% include 'fragments/csrf' %}
+        <button type="submit"
+                class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+            Log out
+        </button>
+    </form>
+</div>
+{% endblock %}

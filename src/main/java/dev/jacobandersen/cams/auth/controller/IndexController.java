@@ -1,5 +1,6 @@
 package dev.jacobandersen.cams.auth.controller;
 
+import dev.jacobandersen.cams.auth.model.domain.Role;
 import dev.jacobandersen.cams.auth.model.domain.User;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -12,6 +13,7 @@ public class IndexController extends BaseController {
     public String index(Authentication authentication, Model model) {
         final User user = (User) authentication.getPrincipal();
         model.addAttribute("nickname", user.getNickname());
+        model.addAttribute("isAdmin", user.getRoles().stream().map(Role::getName).toList().contains("admin"));
         return "index";
     }
 }

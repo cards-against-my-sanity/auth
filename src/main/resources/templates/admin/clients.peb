@@ -1,0 +1,37 @@
+{# @pebvariable name="registeredClients" type="java.util.List<org.springframework.security.oauth2.server.authorization.client.RegisteredClient>" #}
+
+{% extends "admin/admin_layout" %}
+
+{% block title %}OAuth Client List{% endblock %}
+{% block pageHeader %}Registered OAuth Clients{% endblock %}
+
+{% block content %}
+<div class="flex flex-col gap-y-8">
+    <a href="{{ href('/admin/oauth/clients/add') }}" class="p-4 rounded-md bg-blue-400">Add Client</a>
+    <table>
+        <thead>
+            <tr>
+                <th>Client Name</th>
+                <th>Client ID</th>
+                <th>Controls</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for client in registeredClients %}
+            <tr>
+                <td>{{ client.getClientName() }}</td>
+                <td>{{ client.getClientId() }}</td>
+                <td>
+                    <div class="flex flex-col gap-y-2">
+                        <a href="{{ href('/admin/oauth/clients/' + client.getId()) }}" class="hover:text-blue-400">View</a>
+                        <a href="{{ href('/admin/oauth/clients/' + client.getId()) + '/edit' }}" class="hover:text-blue-400">Edit</a>
+                        <a href="{{ href('/admin/oauth/clients/' + client.getId() + '/regenerate_secret') }}" class="hover:text-blue-400">Regenerate Secret</a>
+                        <a href="{{ href('/admin/oauth/clients/' + client.getId() + '/delete') }}" class="text-red-400 hover:text-red-600">Delete</a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

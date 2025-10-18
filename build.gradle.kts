@@ -46,7 +46,8 @@ dependencies {
     val jakartaPersistenceApiVersion = "3.2.0"
     val mockitoCoreVersion = "5.17.0"
     val testContainersVersion = "1.21.0"
-    val apacheCommonsLangVersion = "3.17.0"
+    val apacheCommonsLangVersion = "3.19.0"
+    val pebbleVersion = "3.2.4"
 
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -66,6 +67,8 @@ dependencies {
     implementation("org.bouncycastle:bcpkix-jdk18on:${bouncycastleVersion}")
     implementation("nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect")
     implementation("jakarta.persistence:jakarta.persistence-api:${jakartaPersistenceApiVersion}")
+    implementation("org.apache.commons:commons-lang3:${apacheCommonsLangVersion}")
+    implementation("io.pebbletemplates:pebble-spring-boot-starter:${pebbleVersion}")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     runtimeOnly("io.micrometer:micrometer-registry-prometheus")
     runtimeOnly("org.postgresql:postgresql")
@@ -75,7 +78,6 @@ dependencies {
     testImplementation("org.mockito:mockito-core:${mockitoCoreVersion}")
     testImplementation("org.testcontainers:junit-jupiter:${testContainersVersion}")
     testImplementation("org.testcontainers:postgresql:${testContainersVersion}")
-    testImplementation("org.apache.commons:commons-lang3:${apacheCommonsLangVersion}")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
