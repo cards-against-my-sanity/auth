@@ -48,6 +48,7 @@ dependencies {
     val testContainersVersion = "1.21.0"
     val apacheCommonsLangVersion = "3.19.0"
     val pebbleVersion = "3.2.4"
+    val lettuceVersion = "6.8.1.RELEASE"
 
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -56,6 +57,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-authorization-server")
+    implementation("org.springframework.session:spring-session-data-redis")
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
     implementation("org.thymeleaf.extras:thymeleaf-extras-springsecurity6")
     implementation("org.flywaydb:flyway-core")
@@ -69,6 +71,7 @@ dependencies {
     implementation("jakarta.persistence:jakarta.persistence-api:${jakartaPersistenceApiVersion}")
     implementation("org.apache.commons:commons-lang3:${apacheCommonsLangVersion}")
     implementation("io.pebbletemplates:pebble-spring-boot-starter:${pebbleVersion}")
+    implementation("io.lettuce:lettuce-core:${lettuceVersion}")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     runtimeOnly("io.micrometer:micrometer-registry-prometheus")
     runtimeOnly("org.postgresql:postgresql")

@@ -31,6 +31,13 @@ spring:
             required: ${SMTP_STARTTLS_REQUIRED:true}
   mvc:
     log-request-details: ${LOG_REQUEST_DETAILS:false}
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT:6379}
+      username: ${REDIS_USERNAME}
+      password: ${REDIS_PASSWORD}
+
 
 auth:
   jwt-issuer-uri: ${AUTH_SERVER_ISSUER_URI:https://example.com}
