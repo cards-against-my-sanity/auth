@@ -42,7 +42,7 @@ public abstract class TokenValidationContext {
     }
 
     public final boolean completeValidation(@NonNull final User user) {
-        return isInitiallyValid() && userId.equals(user.getId()) && isValidFor(user, claimsSet);
+        return isInitiallyValid() && userId.equals(user.id()) && isValidFor(user, claimsSet);
     }
 
     public UUID getUserId() {

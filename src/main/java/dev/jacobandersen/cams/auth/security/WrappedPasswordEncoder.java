@@ -5,14 +5,12 @@ import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-public final class WrappedPasswordEncoder implements PasswordEncoder {
-    private final PasswordEncoder wrapper;
-
-    public WrappedPasswordEncoder(ExternalWrap wrap) {
-        wrapper = switch (wrap) {
+public record WrappedPasswordEncoder(PasswordEncoder wrapper) implements PasswordEncoder {
+    public static WrappedPasswordEncoder ofExternalWrap(ExternalWrap wrapper) {
+        return new WrappedPasswordEncoder(switch (wrapper) {
             case ARGON2 -> Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8();
             case BCRYPT -> new BCryptPasswordEncoder(12);
-        };
+        });
     }
 
     private String sha512(final CharSequence password) {

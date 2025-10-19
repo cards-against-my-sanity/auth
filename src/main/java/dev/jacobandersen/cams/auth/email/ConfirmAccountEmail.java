@@ -16,7 +16,7 @@ public class ConfirmAccountEmail extends BaseEmail {
 
     @Override
     public String getRecipient() {
-        return user.getEmail();
+        return user.email();
     }
 
     @Override
@@ -26,7 +26,7 @@ public class ConfirmAccountEmail extends BaseEmail {
 
     @Override
     public void fillContext(Map<String, Object> context) {
-        context.put("nickname", user.getNickname());
+        context.put("nickname", user.nickname());
         context.put("token", token);
     }
 }

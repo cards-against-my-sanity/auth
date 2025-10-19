@@ -1,6 +1,6 @@
 package dev.jacobandersen.cams.auth.repo;
 
-import dev.jacobandersen.cams.auth.model.domain.User;
+import dev.jacobandersen.cams.auth.model.entity.UserEntity;
 import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.stereotype.Repository;
 
@@ -8,8 +8,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface UserRepository extends ListCrudRepository<User, UUID> {
-    Optional<User> findByEmail(String email);
+public interface UserRepository extends ListCrudRepository<UserEntity, UUID> {
+    Optional<UserEntity> findByEmail(String email);
 
     boolean existsByEmailOrNickname(String email, String nickname);
 

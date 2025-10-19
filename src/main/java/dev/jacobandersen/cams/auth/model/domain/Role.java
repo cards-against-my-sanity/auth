@@ -1,32 +1,18 @@
 package dev.jacobandersen.cams.auth.model.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import dev.jacobandersen.cams.auth.model.entity.RoleEntity;
 
 import java.io.Serializable;
 import java.util.UUID;
 
-@Entity
-@Table(name = "roles")
-public class Role implements Serializable {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id", columnDefinition = "char(36)")
-    @JsonIgnore
-    private UUID id;
-
-    @Column(name = "name", unique = true, nullable = false)
-    private String name;
-
-    public UUID getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+@JsonSerialize
+public record Role(UUID id, String name) implements Serializable {
+    public RoleEntity toEntity() {
+        final RoleEntity entity = new RoleEntity();
+        entity.setId(id);
+        entity.setName(name);
+        return entity;
     }
 }

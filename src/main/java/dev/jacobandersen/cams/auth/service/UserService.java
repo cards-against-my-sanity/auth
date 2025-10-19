@@ -3,6 +3,8 @@ package dev.jacobandersen.cams.auth.service;
 import dev.jacobandersen.cams.auth.dto.SignUpRequestDto;
 import dev.jacobandersen.cams.auth.model.domain.Role;
 import dev.jacobandersen.cams.auth.model.domain.User;
+import dev.jacobandersen.cams.auth.model.entity.RoleEntity;
+import dev.jacobandersen.cams.auth.model.entity.UserEntity;
 import dev.jacobandersen.cams.auth.repo.RoleRepository;
 import dev.jacobandersen.cams.auth.repo.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,13 +24,13 @@ import java.util.stream.Collectors;
 public class UserService implements UserDetailsService {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
-    private final Role userRole;
+    private final RoleEntity userRoleEntity;
 
     @Autowired
     public UserService(PasswordEncoder passwordEncoder, UserRepository userRepository, RoleRepository roleRepository) {
         this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
-        userRole = roleRepository.findByName("user");
+        userRoleEntity = roleRepository.findByName("user");
     }
 
     public boolean existsByEmail(String email) {
@@ -44,40 +46,46 @@ public class UserService implements UserDetailsService {
     }
 
     public Optional<User> findUserById(UUID id) {
-        return userRepository.findById(id);
+        return userRepository.findById(id).map(UserEntity::toDomain);
     }
 
     public Optional<User> findUserByEmail(String email) {
-        return userRepository.findByEmail(email);
+        return userRepository.findByEmail(email).map(UserEntity::toDomain);
     }
 
     public User createUser(SignUpRequestDto dto) {
-        User user = new User();
-        user.setEmail(dto.getEmail());
-        user.setPassword(passwordEncoder.encode(dto.getPassword()));
-        user.setNickname(dto.getNickname());
-        user.setRoles(List.of(userRole));
-        return userRepository.save(user);
+        final UserEntity entity = new UserEntity();
+        entity.setEmail(dto.getEmail());
+        entity.setPassword(passwordEncoder.encode(dto.getPassword()));
+        entity.setNickname(dto.getNickname());
+        entity.setRoles(List.of(userRoleEntity));
+        return userRepository.save(entity).toDomain();
     }
 
-    public void setUserConfirmed(User user) {
-        user.setConfirmed(true);
-        userRepository.save(user);
+    public User setUserConfirmed(User user) {
+        UserEntity entity = user.toEntity();
+        entity.setConfirmed(true);
+        entity = userRepository.save(entity);
+        return entity.toDomain();
     }
 
-    public void setUserRoles(User user, List<Role> roles) {
-        user.setRoles(roles);
-        userRepository.save(user);
+    public User setUserRoles(User user, List<Role> roles) {
+        UserEntity entity = user.toEntity();
+        entity.setRoles(roles.stream().map(Role::toEntity).toList());
+        entity = userRepository.save(entity);
+        return entity.toDomain();
     }
 
-    public void updateUserPassword(User user, String password) {
-        user.setPassword(passwordEncoder.encode(password));
-        userRepository.save(user);
+    public User updateUserPassword(User user, String password) {
+        UserEntity entity = user.toEntity();
+        entity.setConfirmed(false);
+        entity = userRepository.save(entity);
+        return entity.toDomain();
     }
 
     public void deleteUser(User user) {
         if (null == user) return;
-        userRepository.delete(user);
+        userRepository.delete(user.toEntity());
     }
 
     @Override
@@ -91,11 +99,11 @@ public class UserService implements UserDetailsService {
 
     public OidcUserInfo convertToOidcUserInfo(final User user) {
         return OidcUserInfo.builder()
-                .subject(user.getId().toString())
-                .email(user.getEmail())
-                .emailVerified(user.isConfirmed())
-                .preferredUsername(user.getNickname())
-                .claim("roles", user.getRoles().stream().map(Role::getName).collect(Collectors.joining(",")))
+                .subject(user.id().toString())
+                .email(user.email())
+                .emailVerified(user.confirmed())
+                .preferredUsername(user.nickname())
+                .claim("roles", user.roles().stream().map(Role::name).collect(Collectors.joining(",")))
                 .build();
     }
 }

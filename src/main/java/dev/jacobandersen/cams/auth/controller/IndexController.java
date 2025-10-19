@@ -12,8 +12,8 @@ public class IndexController extends BaseController {
     @GetMapping("/")
     public String index(Authentication authentication, Model model) {
         final User user = (User) authentication.getPrincipal();
-        model.addAttribute("nickname", user.getNickname());
-        model.addAttribute("isAdmin", user.getRoles().stream().map(Role::getName).toList().contains("admin"));
+        model.addAttribute("nickname", user.nickname());
+        model.addAttribute("isAdmin", user.roles().stream().map(Role::name).toList().contains("admin"));
         return "index";
     }
 }

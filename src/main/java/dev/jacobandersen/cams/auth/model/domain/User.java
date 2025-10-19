@@ -1,135 +1,72 @@
 package dev.jacobandersen.cams.auth.model.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import dev.jacobandersen.cams.auth.model.entity.UserEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
-@Entity
-@Table(name = "users")
-public class User implements UserDetails {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id", columnDefinition = "char(36)")
-    private UUID id;
-
-    @Column(name = "email", unique = true, nullable = false)
+@JsonSerialize
+public record User(UUID id, String email, @JsonIgnore String password, String nickname, boolean confirmed, boolean banned, String banReason, List<Role> roles) implements Serializable, UserDetails {
+    @Override
     @JsonIgnore
-    private String email;
-
-    @Column(name = "password", nullable = false)
-    @JsonIgnore
-    private String password;
-
-    @Column(name = "nickname", unique = true, nullable = false, length = 16)
-    private String nickname;
-
-    @Column(name = "confirmed", nullable = false)
-    @JsonIgnore
-    private boolean confirmed;
-
-    @Column(name = "banned", nullable = false)
-    @JsonIgnore
-    private boolean banned;
-
-    @Column(name = "ban_reason", length = 1024)
-    @JsonIgnore
-    private String banReason;
-
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "user_roles",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
-    private List<Role> roles;
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public String getEmail() {
+    public String getUsername() {
         return email;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
+    @Override
+    @JsonIgnore
     public String getPassword() {
         return password;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    @Override
+    @JsonIgnore
+    public boolean isEnabled() {
+        return !banned;
     }
 
-    public String getNickname() {
-        return nickname;
-    }
-
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
-    }
-
-    public boolean isConfirmed() {
+    @Override
+    @JsonIgnore
+    public boolean isAccountNonLocked() {
         return confirmed;
     }
 
-    public void setConfirmed(boolean confirmed) {
-        this.confirmed = confirmed;
-    }
-
-    public boolean isBanned() {
-        return banned;
-    }
-
-    public void setBanned(boolean banned) {
-        this.banned = banned;
-    }
-
-    public String getBanReason() {
-        return banReason;
-    }
-
-    public void setBanReason(String banReason) {
-        this.banReason = banReason;
-    }
-
-    public List<Role> getRoles() {
-        return roles;
-    }
-
-    public void setRoles(List<Role> roles) {
-        this.roles = roles;
+    @Override
+    @JsonIgnore
+    public boolean isAccountNonExpired() {
+        return true;
     }
 
     @Override
+    @JsonIgnore
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return getRoles().stream().map(role -> new SimpleGrantedAuthority(role.getName())).toList();
+        return roles.stream().map(role -> new SimpleGrantedAuthority(role.name())).toList();
     }
 
-    @Override
-    public String getUsername() {
-        return getEmail();
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return !isBanned();
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return isConfirmed();
+    public UserEntity toEntity() {
+        final UserEntity userEntity = new UserEntity();
+        userEntity.setId(id);
+        userEntity.setEmail(email);
+        userEntity.setPassword(password);
+        userEntity.setNickname(nickname);
+        userEntity.setConfirmed(confirmed);
+        userEntity.setBanned(banned);
+        userEntity.setBanReason(banReason);
+        userEntity.setRoles(new ArrayList<>(roles.stream().map(Role::toEntity).toList()));
+        return userEntity;
     }
 }

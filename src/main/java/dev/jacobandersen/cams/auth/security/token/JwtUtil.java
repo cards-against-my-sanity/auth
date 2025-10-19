@@ -26,7 +26,7 @@ public class JwtUtil {
         this.verifier = verifier;
     }
 
-    private String createToken(UUID userId, Duration validDuration, String purpose, Map<String, Object> additionalClaims) throws JOSEException {
+    private String createToken(UUID userId, Duration validDuration, String purpose, Map<String, String> additionalClaims) throws JOSEException {
         final Date now = new Date();
         final JWTClaimsSet.Builder claimsSetBuilder = new JWTClaimsSet.Builder()
                 .issuer(keyId)
@@ -50,11 +50,11 @@ public class JwtUtil {
     }
 
     public String createConfirmationToken(User user, Duration duration) throws JOSEException {
-        return createToken(user.getId(), duration, "confirmation", Collections.emptyMap());
+        return createToken(user.id(), duration, "confirmation", Collections.emptyMap());
     }
 
     public String createPasswordResetToken(User user, Duration duration) throws JOSEException {
-        return createToken(user.getId(), duration, "password-reset", Collections.singletonMap(
+        return createToken(user.id(), duration, "password-reset", Collections.singletonMap(
                 "vfh", user.getPassword()
         ));
     }

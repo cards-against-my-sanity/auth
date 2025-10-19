@@ -90,7 +90,7 @@ public class UserController extends BaseController {
         }
 
         final User user = validationResult.user();
-        if (user.isConfirmed()) {
+        if (user.confirmed()) {
             addFlashAlert(redirectAttributes, Alert.info("Your account is already confirmed."));
         } else {
             addFlashAlert(redirectAttributes, Alert.success("Your account has been confirmed. You may now log in."));
@@ -112,8 +112,8 @@ public class UserController extends BaseController {
         }
 
         final User user = userService.findUserByEmail(dto.getEmail()).orElse(null);
-        if (user != null) {
-            if (user.isConfirmed()) {
+        if (null != user) {
+            if (user.confirmed()) {
                 addFlashAlert(redirectAttributes, Alert.info("The requested account is already confirmed."));
             } else {
                 try {
@@ -168,10 +168,10 @@ public class UserController extends BaseController {
             return "forgot_password";
         }
 
-        final User user = userService.findUserByEmail(dto.getEmail()).orElse(null);
-        if (user != null) {
+        final dev.jacobandersen.cams.auth.model.domain.User userEntity = userService.findUserByEmail(dto.getEmail()).orElse(null);
+        if (userEntity != null) {
             try {
-                emailService.sendMail(new ForgotPasswordEmail(user, tokenService.createPasswordResetToken(user)));
+                emailService.sendMail(new ForgotPasswordEmail(userEntity, tokenService.createPasswordResetToken(userEntity)));
             } catch (MessagingException ex) {
                 addAlert(model, Alert.error("A system error has occurred. Please try again later."));
             }
