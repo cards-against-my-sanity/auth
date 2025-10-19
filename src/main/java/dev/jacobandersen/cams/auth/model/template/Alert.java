@@ -2,7 +2,9 @@ package dev.jacobandersen.cams.auth.model.template;
 
 import org.springframework.lang.NonNull;
 
-public record Alert(@NonNull AlertType type, @NonNull String message) {
+import java.io.Serializable;
+
+public record Alert(@NonNull AlertType type, @NonNull String message) implements Serializable {
     public static Alert success(@NonNull String message) {
         return new Alert(AlertType.SUCCESS, message);
     }

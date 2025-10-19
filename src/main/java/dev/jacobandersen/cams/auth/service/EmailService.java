@@ -1,25 +1,23 @@
 package dev.jacobandersen.cams.auth.service;
 
 import dev.jacobandersen.cams.auth.email.BaseEmail;
+import io.pebbletemplates.pebble.PebbleEngine;
+import io.pebbletemplates.pebble.loader.ClasspathLoader;
+import io.pebbletemplates.pebble.loader.Loader;
 import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.thymeleaf.TemplateEngine;
-import org.thymeleaf.context.Context;
-import org.thymeleaf.spring6.SpringTemplateEngine;
-import org.thymeleaf.templatemode.TemplateMode;
-import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Locale;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class EmailService {
     private final JavaMailSender mailSender;
-    private final TemplateEngine templateEngine;
+    private final PebbleEngine pebbleEngine;
 
     @Value("${app.base-url}")
     private String appBaseUrl;
@@ -28,20 +26,21 @@ public class EmailService {
     public EmailService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
 
-        final ClassLoaderTemplateResolver templateResolver = new ClassLoaderTemplateResolver();
-        templateResolver.setPrefix("email/");
-        templateResolver.setSuffix(".html");
-        templateResolver.setTemplateMode(TemplateMode.HTML);
-        templateResolver.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        final Loader<?> loader = new ClasspathLoader();
+        loader.setPrefix("email/");
+        loader.setSuffix(".peb");
+        loader.setCharset("UTF-8");
 
-        templateEngine = new SpringTemplateEngine();
-        templateEngine.addTemplateResolver(templateResolver);
+        pebbleEngine = new PebbleEngine.Builder()
+                .loader(loader)
+                .build();
     }
 
     @Async
     public <T extends BaseEmail> void sendMail(T message) throws MessagingException {
-        Context context = new Context(Locale.ROOT);
-        context.setVariable("app_base_url", appBaseUrl);
-        message.send(mailSender, templateEngine, context);
+        Map<String, Object> context = new HashMap<>();
+        context.put("app_base_url", appBaseUrl);
+
+        message.send(mailSender, pebbleEngine, context);
     }
 }

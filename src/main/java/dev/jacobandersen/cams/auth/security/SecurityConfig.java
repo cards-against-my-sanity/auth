@@ -21,6 +21,9 @@ public class SecurityConfig {
     @Value("${auth.jwt-issuer-uri}")
     private String authJwtIssuerUri;
 
+    @Value("${auth.remember-me-key}")
+    private String authRememberMeKey;
+
     @Bean
     @Order(1)
     public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
@@ -54,7 +57,7 @@ public class SecurityConfig {
                                 .loginPage("/login")
                                 .failureHandler(authenticationFailureHandler())
                 )
-                .rememberMe(Customizer.withDefaults())
+                .rememberMe(r -> r.key(authRememberMeKey))
                 .exceptionHandling(ex -> ex.accessDeniedPage("/"))
                 .build();
     }

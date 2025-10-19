@@ -1,0 +1,43 @@
+{% extends "layout" %}
+
+{% block styles %}
+<style>
+.content {
+    margin: 0 auto;
+    padding: 3px 15px 0 15px;
+    font-family: sans-serif;
+}
+
+.content * {
+    margin: 2rem 0;
+}
+
+a:link, a:visited {
+    background-color: indigo;
+}
+
+a:hover {
+    background-color: blueviolet;
+}
+
+.button {
+    padding: 0.75rem 1.5rem;
+    color: white;
+    background-color: indigo;
+    font-weight: bold;
+    border-radius: 0.75rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="content">
+    <p>Hey there, <span>{{ nickname }}</span>,</p>
+    <p>Someone (hopefully you) has created an account at InsanityID (the account provider for games
+        like Cards Against my Sanity).</p>
+    <p>Before you can log in and play, you will need to confirm your account by clicking the link below.</p>
+    <a href="{{ app_base_url + '/user/confirm?token=' + token }}" target="_blank" style="color: white" class="button">Confirm Account</a>
+    <p>Please note: This link will expire in ten (10) minutes. If you don't use it before then, you will need to request
+        a new one.</p>
+</div>
+{% endblock %}

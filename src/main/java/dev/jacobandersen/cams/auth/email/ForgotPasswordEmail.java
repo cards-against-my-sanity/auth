@@ -1,8 +1,8 @@
 package dev.jacobandersen.cams.auth.email;
 
 import dev.jacobandersen.cams.auth.model.domain.User;
-import org.thymeleaf.context.Context;
-import org.thymeleaf.context.IContext;
+
+import java.util.Map;
 
 public class ForgotPasswordEmail extends BaseEmail {
     private final User user;
@@ -25,9 +25,8 @@ public class ForgotPasswordEmail extends BaseEmail {
     }
 
     @Override
-    public IContext fillContext(Context context) {
-        context.setVariable("nickname", user.getNickname());
-        context.setVariable("token", token);
-        return context;
+    public void fillContext(Map<String, Object> context) {
+        context.put("nickname", user.getNickname());
+        context.put("token", token);
     }
 }

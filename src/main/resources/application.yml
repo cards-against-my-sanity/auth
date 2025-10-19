@@ -1,8 +1,5 @@
 server:
   port: ${SERVER_PORT:8080}
-  servlet:
-    session:
-      timeout: 24h
 
 app:
   base-url: ${APP_BASE_URL:http://localhost:8080}
@@ -40,9 +37,12 @@ spring:
       port: ${REDIS_PORT:6379}
       username: ${REDIS_USERNAME}
       password: ${REDIS_PASSWORD}
+  session:
+    timeout: ${SESSION_TIMEOUT_DURATION}
 
 auth:
   jwt-issuer-uri: ${AUTH_SERVER_ISSUER_URI:https://example.com}
+  remember-me-key: ${AUTH_REMEMBER_ME_KEY}
   key:
     id: ${AUTH_KEY_ID:}
     path:
