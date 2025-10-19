@@ -1,5 +1,6 @@
 {% extends "layout" %}
 {% import "fragments/input" %}
+{% import "fragments/checkbox" %}
 
 {% block title %}Sign in{% endblock %}
 {% block pageHeader %}Sign in to your account{% endblock %}
@@ -8,6 +9,7 @@
 <form name="loginForm" class="space-y-6" action="{{ href('/login') }}" method="POST">
     {{ errorableInput(type='email', name='username', id='email', autocomplete='email', labelText='Email', required='true', formName='loginForm') }}
     {{ errorableInput(type='password', name='password', id='password', autocomplete='current-password', labelText='Password', required='true', formName='loginForm') }}
+    {{ checkbox(name='remember-me', id='remember-me', labelText='Remember Me', checked='true') }}
     {% include 'fragments/csrf' %}
 
     <div class="flex items-center justify-between">
