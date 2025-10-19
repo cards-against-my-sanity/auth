@@ -16,37 +16,13 @@ import java.util.Map;
 public class EncoderConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
-        final PasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder(12);
-        final PasswordEncoder argon2PasswordEncoder = Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8();
-        final PasswordEncoder argon2Sha512PasswordEncoder = new PasswordEncoder() {
-            private String sha(final CharSequence rawPassword) {
-                return Sha512DigestUtils.shaHex(rawPassword.toString());
-            }
-
-            @Override
-            public String encode(CharSequence rawPassword) {
-                return argon2PasswordEncoder.encode(sha(rawPassword));
-            }
-
-            @Override
-            public boolean matches(CharSequence rawPassword, String encodedPassword) {
-                return argon2PasswordEncoder.matches(
-                        sha(rawPassword),
-                        encodedPassword
-                );
-            }
-
-            @Override
-            public boolean upgradeEncoding(String encodedPassword) {
-                return argon2PasswordEncoder.upgradeEncoding(encodedPassword);
-            }
-        };
+        final PasswordEncoder argon2Sha512PasswordEncoder = new WrappedPasswordEncoder(WrappedPasswordEncoder.ExternalWrap.ARGON2);
+        final PasswordEncoder bcryptSha512PasswordEncoder = new WrappedPasswordEncoder(WrappedPasswordEncoder.ExternalWrap.BCRYPT);
 
         final String customEncoderId = "argon2(sha512)";
         final Map<String, PasswordEncoder> encoders = new HashMap<>();
-        encoders.put("bcrypt", bCryptPasswordEncoder);
-        encoders.put("argon2", argon2PasswordEncoder);
         encoders.put(customEncoderId, argon2Sha512PasswordEncoder);
+        encoders.put("bcrypt(sha512)", bcryptSha512PasswordEncoder);
 
         return new DelegatingPasswordEncoder(customEncoderId, encoders);
     }
