@@ -44,11 +44,13 @@ dependencies {
     val commonsValidatorVersion = "1.9.0"
     val bouncycastleVersion = "1.80"
     val jakartaPersistenceApiVersion = "3.2.0"
-    val mockitoCoreVersion = "5.17.0"
-    val testContainersVersion = "1.21.0"
     val apacheCommonsLangVersion = "3.19.0"
     val pebbleVersion = "3.2.4"
     val lettuceVersion = "6.8.1.RELEASE"
+    val mockitoCoreVersion = "5.17.0"
+    val testContainersVersion = "2.0.1"
+    val testContainersRedisVersion = "2.2.2"
+    val commonsIoVersion = "2.20.0"
 
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -76,8 +78,10 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("org.mockito:mockito-core:${mockitoCoreVersion}")
-    testImplementation("org.testcontainers:junit-jupiter:${testContainersVersion}")
-    testImplementation("org.testcontainers:postgresql:${testContainersVersion}")
+    testImplementation("org.testcontainers:testcontainers-junit-jupiter:${testContainersVersion}")
+    testImplementation("org.testcontainers:testcontainers-postgresql:${testContainersVersion}")
+    testImplementation("com.redis:testcontainers-redis:${testContainersRedisVersion}")
+    testImplementation("commons-io:commons-io:${commonsIoVersion}")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 

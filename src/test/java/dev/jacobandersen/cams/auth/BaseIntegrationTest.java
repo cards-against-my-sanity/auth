@@ -1,14 +1,15 @@
 package dev.jacobandersen.cams.auth;
 
+import com.redis.testcontainers.RedisContainer;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemWriter;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -24,12 +25,15 @@ public abstract class BaseIntegrationTest {
     private static final int MAILHOG_PORT_HTTP = 8025;
 
     @Container
-    @SuppressWarnings("resource")
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:latest")
+    static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:latest")
             .withDatabaseName("cams_auth")
             .withUsername("test")
             .withPassword("test")
             .withInitScript("pg-init.sql")
+            .waitingFor(Wait.forListeningPort());
+
+    @Container
+    static RedisContainer redis = new RedisContainer("redis:latest")
             .waitingFor(Wait.forListeningPort());
 
     @Container
@@ -48,6 +52,9 @@ public abstract class BaseIntegrationTest {
         registry.add("spring.datasource.url", postgres::getJdbcUrl);
         registry.add("spring.datasource.username", postgres::getUsername);
         registry.add("spring.datasource.password", postgres::getPassword);
+
+        registry.add("spring.data.redis.host", redis::getHost);
+        registry.add("spring.data.redis.port", redis::getRedisPort);
 
         registry.add("spring.mail.host", mailhog::getHost);
         registry.add("spring.mail.properties.mail.smtp.port", () -> mailhog.getMappedPort(MAILHOG_PORT_SMTP));
