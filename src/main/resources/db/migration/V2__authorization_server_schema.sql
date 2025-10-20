@@ -30,8 +30,7 @@ end;
 language plpgsql;
 
 create trigger oauth_client__hash_client_secret_trigger
-    before insert or
-update
+    before insert
     on oauth_client
     for each row
     execute function oauth_client__hash_client_secret();
