@@ -3,7 +3,6 @@ package dev.jacobandersen.cams.auth.security;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.jacobandersen.cams.auth.dto.AddOrEditClientRequestDto;
 import dev.jacobandersen.cams.auth.model.oauth.Client;
 import dev.jacobandersen.cams.auth.repo.ClientRepository;
 import jakarta.transaction.Transactional;
@@ -20,7 +19,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Component

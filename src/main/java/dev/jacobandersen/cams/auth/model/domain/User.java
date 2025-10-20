@@ -14,7 +14,8 @@ import java.util.List;
 import java.util.UUID;
 
 @JsonSerialize
-public record User(UUID id, String email, @JsonIgnore String password, String nickname, boolean confirmed, boolean banned, String banReason, List<Role> roles) implements Serializable, UserDetails {
+public record User(UUID id, String email, @JsonIgnore String password, String nickname, boolean confirmed,
+                   boolean banned, String banReason, List<Role> roles) implements Serializable, UserDetails {
     @Override
     @JsonIgnore
     public String getUsername() {

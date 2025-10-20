@@ -36,7 +36,7 @@ public abstract class BaseEmail {
 
         final String html;
         try {
-            final PebbleTemplate template =  engine.getTemplate(templateName);
+            final PebbleTemplate template = engine.getTemplate(templateName);
             StringWriter htmlWriter = new StringWriter();
             template.evaluate(htmlWriter, context, Locale.ROOT);
             html = htmlWriter.toString();

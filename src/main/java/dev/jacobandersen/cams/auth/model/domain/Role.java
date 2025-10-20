@@ -1,6 +1,5 @@
 package dev.jacobandersen.cams.auth.model.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import dev.jacobandersen.cams.auth.model.entity.RoleEntity;
 
