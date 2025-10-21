@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.jacobandersen.cams.auth.model.oauth.Client;
 import dev.jacobandersen.cams.auth.repo.ClientRepository;
-import jakarta.transaction.Transactional;
 import org.springframework.security.jackson2.SecurityJackson2Modules;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;

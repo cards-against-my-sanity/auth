@@ -7,6 +7,7 @@ import dev.jacobandersen.cams.auth.util.SetUtil;
 import jakarta.validation.Valid;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
@@ -29,10 +30,12 @@ import java.util.stream.Collectors;
 @RequestMapping("admin/oauth")
 public class OAuthAdminController extends BaseController {
     private final JpaRegisteredClientRepository jpaRegisteredClientRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public OAuthAdminController(JpaRegisteredClientRepository jpaRegisteredClientRepository) {
+    public OAuthAdminController(JpaRegisteredClientRepository jpaRegisteredClientRepository, PasswordEncoder passwordEncoder) {
         this.jpaRegisteredClientRepository = jpaRegisteredClientRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @GetMapping("clients")
@@ -64,7 +67,7 @@ public class OAuthAdminController extends BaseController {
         final RegisteredClient newClient = RegisteredClient.withId(UUID.randomUUID().toString())
                 .clientId(clientId)
                 .clientIdIssuedAt(Instant.now())
-                .clientSecret(clientSecret)
+                .clientSecret(passwordEncoder.encode(clientSecret))
                 .clientName(dto.getClientName())
                 .clientAuthenticationMethods(methods -> methods.addAll(dto.getClientAuthenticationMethods().stream().map(ClientAuthenticationMethod::valueOf).toList()))
                 .authorizationGrantTypes(types -> types.addAll(dto.getAuthorizationGrantTypes().stream().map(AuthorizationGrantType::new).toList()))
@@ -150,7 +153,7 @@ public class OAuthAdminController extends BaseController {
         final String clientSecret = RandomStringUtils.secure().next(12, true, true);
 
         final RegisteredClient updated = RegisteredClient.from(client)
-                .clientSecret(clientSecret)
+                .clientSecret(passwordEncoder.encode(clientSecret))
                 .build();
 
         jpaRegisteredClientRepository.save(updated);

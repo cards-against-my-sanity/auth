@@ -1,7 +1,7 @@
 create table oauth_client
 (
     id                            uuid          not null default gen_random_uuid(),
-    client_id                     varchar(64)   not null default encode(sha256(gen_random_bytes(32)), 'hex'),
+    client_id                     varchar(64)   not null default gen_random_uuid(),
     client_id_issued_at           timestamp              default now() not null,
     client_secret                 varchar(128),
     client_secret_expires_at      timestamp,
@@ -15,25 +15,6 @@ create table oauth_client
     token_settings                varchar(2000) not null,
     primary key (id)
 );
-
-create function oauth_client__hash_client_secret()
-    returns trigger as $$
-begin
-        if
-new.client_secret is not null then
-            new.client_secret :=
-                    concat('{bcrypt(sha512)}', crypt(encode(sha512(new.client_secret::bytea), 'hex'), gen_salt('bf', 12)));
-end if;
-return new;
-end;
-    $$
-language plpgsql;
-
-create trigger oauth_client__hash_client_secret_trigger
-    before insert
-    on oauth_client
-    for each row
-    execute function oauth_client__hash_client_secret();
 
 create table oauth_authorization
 (
