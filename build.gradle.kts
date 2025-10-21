@@ -11,7 +11,7 @@ plugins {
     id("com.github.node-gradle.node") version "7.1.0"
 }
 
-group = "dev.jacobandersen.cam"
+group = "dev.jacobandersen.cams"
 
 val versionBase = "0.0.1-SNAPSHOT"
 val isSnapshot = versionBase.endsWith("-SNAPSHOT")

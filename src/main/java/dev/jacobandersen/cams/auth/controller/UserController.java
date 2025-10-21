@@ -168,10 +168,10 @@ public class UserController extends BaseController {
             return "forgot_password";
         }
 
-        final dev.jacobandersen.cams.auth.model.domain.User userEntity = userService.findUserByEmail(dto.getEmail()).orElse(null);
-        if (userEntity != null) {
+        final User user = userService.findUserByEmail(dto.getEmail()).orElse(null);
+        if (user != null) {
             try {
-                emailService.sendMail(new ForgotPasswordEmail(userEntity, tokenService.createPasswordResetToken(userEntity)));
+                emailService.sendMail(new ForgotPasswordEmail(user, tokenService.createPasswordResetToken(user)));
             } catch (MessagingException ex) {
                 addAlert(model, Alert.error("A system error has occurred. Please try again later."));
             }
