@@ -103,7 +103,7 @@ public class UserService implements UserDetailsService {
                 .email(user.email())
                 .emailVerified(user.confirmed())
                 .preferredUsername(user.nickname())
-                .claim("roles", user.roles().stream().map(Role::name).collect(Collectors.joining(",")))
+                .claim("roles", user.roles().stream().map(Role::name).toList())
                 .build();
     }
 }
