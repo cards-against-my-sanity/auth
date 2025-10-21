@@ -64,13 +64,6 @@ public class JpaRegisteredClientRepository implements RegisteredClientRepository
         this.clientRepository.save(toEntity(registeredClient));
     }
 
-    @Transactional
-    public void update(RegisteredClient registeredClient) {
-        Assert.notNull(registeredClient, "registeredClient cannot be null");
-        deleteById(registeredClient.getId());
-        save(registeredClient);
-    }
-
     public void deleteById(String id) {
         Assert.hasText(id, "id cannot be empty");
         this.clientRepository.deleteById(UUID.fromString(id));

@@ -129,7 +129,7 @@ public class OAuthAdminController extends BaseController {
                         .build())
                 .build();
 
-        jpaRegisteredClientRepository.update(updated);
+        jpaRegisteredClientRepository.save(updated);
 
         return "redirect:/admin/oauth/clients";
     }
@@ -153,7 +153,7 @@ public class OAuthAdminController extends BaseController {
                 .clientSecret(clientSecret)
                 .build();
 
-        jpaRegisteredClientRepository.update(updated);
+        jpaRegisteredClientRepository.save(updated);
 
         addFlashAlert(redirectAttributes, Alert.success("""
                 Successfully regenerate client secret<br>
