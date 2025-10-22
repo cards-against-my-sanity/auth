@@ -15,10 +15,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class UserService implements UserDetailsService {
@@ -103,7 +103,7 @@ public class UserService implements UserDetailsService {
                 .email(user.email())
                 .emailVerified(user.confirmed())
                 .preferredUsername(user.nickname())
-                .claim("roles", user.roles().stream().map(Role::name).toList())
+                .claim("roles", new ArrayList<>(user.roles().stream().map(Role::name).toList()))
                 .build();
     }
 }
