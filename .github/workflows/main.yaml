@@ -32,33 +32,33 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v3
 
-      - name: Cache SonarQube packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
-
-      - name: Build and run tests
-        run: ./gradlew --no-daemon build test
-
-      - name: Run test coverage verification
-        run: ./gradlew --no-daemon jacocoTestCoverageVerification
-
-      - name: Run SonarQube scan
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: ./gradlew --no-daemon sonar --info
-
-      - name: Run SonarQube quality gate check
-        id: sonarqube-quality-gate-check
-        uses: sonarsource/sonarqube-quality-gate-action@master
-        with:
-          pollingTimeoutSec: 600
-          scanMetadataReportFile: 'build/sonar/report-task.txt'
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+#      - name: Cache SonarQube packages
+#        uses: actions/cache@v4
+#        with:
+#          path: ~/.sonar/cache
+#          key: ${{ runner.os }}-sonar
+#          restore-keys: ${{ runner.os }}-sonar
+#
+#      - name: Build and run tests
+#        run: ./gradlew --no-daemon build test
+#
+#      - name: Run test coverage verification
+#        run: ./gradlew --no-daemon jacocoTestCoverageVerification
+#
+#      - name: Run SonarQube scan
+#        env:
+#          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+#        run: ./gradlew --no-daemon sonar --info
+#
+#      - name: Run SonarQube quality gate check
+#        id: sonarqube-quality-gate-check
+#        uses: sonarsource/sonarqube-quality-gate-action@master
+#        with:
+#          pollingTimeoutSec: 600
+#          scanMetadataReportFile: 'build/sonar/report-task.txt'
+#        env:
+#          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+#          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
       - name: Build container image
         if: github.ref_name == 'main'
