@@ -169,7 +169,7 @@ tasks.jacocoTestCoverageVerification {
     dependsOn(tasks.jacocoTestReport)
     violationRules {
         rule {
-            enabled = false // TODO: re-enable later
+            enabled = (System.getenv("CI") ?: "false").toBoolean()
             element = "BUNDLE"
             limit {
                 counter = "LINE"

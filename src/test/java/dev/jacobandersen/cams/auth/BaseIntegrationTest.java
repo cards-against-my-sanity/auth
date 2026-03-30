@@ -19,7 +19,7 @@ import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 
-@Testcontainers
+@Testcontainers(disabledWithoutDocker = true)
 public abstract class BaseIntegrationTest {
     private static final int MAILHOG_PORT_SMTP = 1025;
     private static final int MAILHOG_PORT_HTTP = 8025;
