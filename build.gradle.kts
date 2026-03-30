@@ -4,7 +4,7 @@ import com.github.gradle.node.npm.task.NpmTask
 plugins {
     java
     jacoco
-    id("org.springframework.boot") version "3.5.6"
+    id("org.springframework.boot") version "3.5.13"
     id("io.spring.dependency-management") version "1.1.7"
     id("org.hibernate.orm") version "7.1.4.Final"
     id("org.sonarqube") version "6.3.1.5724"
